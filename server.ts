@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import multer from 'multer';
 import fs from 'fs';
-import { createServer as createViteServer } from 'vite';
+// Dynamic import for vite (devDependency, not available on Vercel production)
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from './src/db';
@@ -6695,6 +6695,7 @@ app.put('/api/custom-lists/:key', async (req, res) => {
 async function startServer() {
   // Vite middleware & Static serving
   if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
