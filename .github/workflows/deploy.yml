@@ -1,0 +1,69 @@
+name: Deploy to Vercel (CI/CD)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-build:
+    name: Validation & Build Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Run Build (Verification)
+        run: npm run build
+        env:
+          # Pass dummy/preventative environments for static compilation phase
+          NODE_ENV: production
+          VITE_ADMIN_PATH: /admin
+          VITE_ROOT_PATH: /root
+
+  deploy-to-vercel:
+    name: Deploy to Vercel Production
+    needs: validate-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Inspect Environment Compatibility & Secrets Pre-check
+        run: |
+          echo "=== جاري فحص توافق متغيرات البيئة قبل النشر ==="
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "❌ خطأ: لم يتم ضبط VERCEL_TOKEN في Github Secrets!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "❌ خطأ: لم يتم ضبط VERCEL_ORG_ID في Github Secrets!"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "❌ خطأ: لم يتم ضبط VERCEL_PROJECT_ID في Github Secrets!"
+            exit 1
+          fi
+          echo "✅ جميع تكنلوجيا التحقق والرموز السرية الأساسية لنشر Vercel تم التحقق منها بنجاح!"
+
+      - name: Deploy to Vercel Live Environment
+        uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+

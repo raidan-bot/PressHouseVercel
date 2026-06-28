@@ -1,0 +1,51 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  uid          String   @id @map("uid")
+  email        String   @unique
+  passwordHash String?  @map("password_hash")
+  displayName  String?  @map("displayName")
+  photoURL     String?  @map("photoURL")
+  role         String   @default("user")
+  createdAt    DateTime @default(now()) @map("createdAt")
+
+  @@map("users")
+}
+
+model Article {
+  id               String   @id
+  title            Json
+  content          Json
+  category         String
+  authorId         String?  @map("authorId")
+  status           String
+  language         String
+  mainImage        String?  @map("mainImage")
+  showInSlider     Boolean  @default(false) @map("show_in_slider")
+  sliderCaption    Json?    @map("slider_caption")
+  sliderButtonText Json?    @map("slider_button_text")
+  sliderImage      String?  @map("slider_image")
+  seo              Json?
+  createdAt        DateTime @default(now()) @map("createdAt")
+  updatedAt        DateTime @updatedAt @map("updatedAt")
+
+  @@map("articles")
+}
+
+model BetaRegistration {
+  id             String   @id
+  fullName       String   @map("fullName")
+  email          String
+  organization   String?
+  specialization String?
+  createdAt      DateTime @default(now()) @map("createdAt")
+
+  @@map("yemenjpt_beta_registrations")
+}

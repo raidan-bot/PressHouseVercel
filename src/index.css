@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --font-sans: var(--font-family-dyn, "Inter"), "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-family-dyn, "Cairo"), sans-serif;
+  --font-heading: var(--font-family-dyn, "Space Grotesk"), "Cairo", sans-serif;
+  
+  --color-brand-primary: var(--primary-color-dyn, #0f172a);
+  --color-brand-secondary: var(--secondary-color-dyn, #2563eb);
+  --color-brand-accent: var(--accent-color-dyn, #3b82f6);
+
+  --color-blue-600: var(--secondary-color-dyn, #2563eb);
+  --color-blue-900: var(--primary-color-dyn, #0f172a);
+}
+
+:root {
+  --primary: var(--primary-color-dyn, #0f172a);
+  --secondary: var(--secondary-color-dyn, #2563eb);
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+.rtl {
+  direction: rtl;
+  font-family: var(--font-family-dyn, "Cairo"), sans-serif;
+}
+
+.ltr {
+  direction: ltr;
+  font-family: var(--font-family-dyn, "Inter"), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-dyn, "Space Grotesk"), "Cairo", sans-serif;
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl;
+  }
+  
+  .glass-card-dark {
+    @apply bg-slate-900/40 backdrop-blur-md border border-white/10 shadow-xl rounded-2xl;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-blue-600 font-black mb-4 block uppercase tracking-widest text-xs;
+  }
+
+  .btn-primary {
+    @apply bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20 active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-slate-900 border border-slate-200 px-8 py-4 rounded-2xl font-bold hover:bg-slate-50 transition-all active:scale-95 flex items-center justify-center gap-2;
+  }
+
+  .bento-grid {
+    @apply grid grid-cols-1 md:grid-cols-4 gap-6;
+  }
+
+  .page-hero {
+    @apply bg-white border-b border-slate-100 py-16 md:py-24 text-center space-y-6 px-4;
+  }
+
+  .page-card {
+    @apply bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300;
+  }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Quill Editor Customization */
+.quill-wrapper .ql-container {
+  @apply text-base font-sans border-slate-200 rounded-b-2xl;
+  min-height: 300px;
+}
+
+.quill-wrapper .ql-editor {
+  min-height: 300px;
+}
+
+.quill-wrapper .ql-toolbar {
+  @apply border-slate-200 rounded-t-2xl bg-slate-50;
+}
+
+.quill-wrapper[dir="rtl"] .ql-editor {
+  text-align: right;
+  direction: rtl;
+}
+
+.quill-wrapper[dir="rtl"] .ql-toolbar .ql-formats {
+  @apply mr-0 ml-4;
+}
+
+.prose img {
+  @apply rounded-2xl shadow-lg my-8;
+}
+
+.prose blockquote {
+  @apply border-l-4 border-slate-900 bg-slate-100 py-4 px-6 rounded-r-2xl font-medium text-slate-800;
+}
