@@ -17,15 +17,10 @@ import { motion } from "motion/react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Job } from "../../types";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "../../lib/utils";
 import { translateText, generateSeoMetadata } from "../../services/AIService";
 import { api } from "../../services/api";
 import { SmartTranslate } from "../../components/admin/SmartTranslate";
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 const quillModules = {
   toolbar: [

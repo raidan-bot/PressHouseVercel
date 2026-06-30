@@ -10,6 +10,7 @@ import { PressAgentChat } from './PressAgentChat';
 import { SpotlightSearch } from './SpotlightSearch';
 import { api } from '../services/api';
 import { ResponsiveLayoutProvider, ResponsiveLayoutWrapper } from './ResponsiveLayoutWrapper';
+import { SkipToContent, BackToTop } from './ui';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
@@ -109,7 +110,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <ResponsiveLayoutProvider>
-      <div className={isRtl ? 'rtl' : 'ltr'}>
+      <div className={isRtl ? 'rtl' : 'ltr'} style={{ scrollBehavior: 'smooth' }}>
+      <SkipToContent />
       <Helmet>
         <title>{seoTitle}</title>
         <meta name="description" content={seoDescription} />
@@ -162,6 +164,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {!isDashboard && <Navbar />}
       <AnimatePresence mode="wait">
         <motion.main
+          id="main-content"
           key={location.pathname}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -176,6 +179,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
       {!isDashboard && <SpotlightSearch isOpen={isSpotlightOpen} onClose={() => setIsSpotlightOpen(false)} />}
       {!isDashboard && <PressAgentChat />}
+      {!isDashboard && <BackToTop />}
       {!isDashboard && <BottomDock />}
       {!isDashboard && <Footer />}
       </div>

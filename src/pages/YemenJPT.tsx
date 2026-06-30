@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { Cpu, FileText, Layers, ShieldCheck, Sparkles, Monitor, Smartphone, Tablet, BrainCircuit, Database, Search, Zap, Network, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Sparkles, Monitor, Smartphone, Tablet, BrainCircuit, Database, Search, Zap, Network } from 'lucide-react';
+import { Badge, Button, Card } from '../components/ui';
 import { useResponsiveLayout } from '../components/ResponsiveLayoutWrapper';
 import { YemenJPTDetailSection } from '../components/YemenJPTDetailSection';
 import BetaRegistrationForm from '../components/BetaRegistrationForm';
@@ -119,12 +120,12 @@ export default function YemenJPT() {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap justify-center gap-6"
           >
-            <a href="#test-program" className="px-12 py-5 rounded-2xl bg-blue-600 text-white font-black text-sm uppercase tracking-widest hover:bg-blue-700 transition-all shadow-2xl shadow-blue-600/20 flex items-center justify-center">
+            <Button variant="primary" size="lg" href="#test-program" className="px-12 py-5 rounded-2xl uppercase tracking-widest shadow-2xl shadow-blue-600/20">
               {isRtl ? 'انضم للاختبار التجريبي' : 'Join Beta Testing'}
-            </a>
-            <a href="#features" className="px-12 py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-sm">
+            </Button>
+            <Button variant="outline" size="lg" href="#features" className="px-12 py-5 rounded-2xl uppercase tracking-widest bg-white/5 border-white/10 text-white hover:bg-white/10 backdrop-blur-sm">
               {isRtl ? 'اكتشف الميزات' : 'Explore Features'}
-            </a>
+            </Button>
           </motion.div>
         </div>
       </section>
@@ -167,13 +168,14 @@ export default function YemenJPT() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ y: -10 }}
-                className="bg-slate-50 p-10 rounded-[48px] border border-slate-100/80 hover:bg-white hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-8 transition-transform group-hover:scale-110 group-hover:rotate-6">
-                  <feat.icon size={32} />
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors leading-tight">{feat.title}</h3>
-                <p className="text-slate-500 leading-relaxed text-sm font-medium">{feat.desc}</p>
+                <Card variant="ghost" className="bg-slate-50 p-10 rounded-[48px] border border-slate-100/80 hover:bg-white hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 group">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-8 transition-transform group-hover:scale-110 group-hover:rotate-6">
+                    <feat.icon size={32} />
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 mb-4 group-hover:text-blue-600 transition-colors leading-tight">{feat.title}</h3>
+                  <p className="text-slate-500 leading-relaxed text-sm font-medium">{feat.desc}</p>
+                </Card>
               </motion.div>
             ))}
           </div>
@@ -215,9 +217,9 @@ export default function YemenJPT() {
               </div>
             </div>
 
-            <div className="lg:col-span-7 bg-white/5 border border-white/10 p-8 md:p-12 rounded-[48px] backdrop-blur-md">
+            <Card variant="glass" className="lg:col-span-7 bg-white/5 border border-white/10 p-8 md:p-12 rounded-[48px] backdrop-blur-md">
               <BetaRegistrationForm />
-            </div>
+            </Card>
           </div>
         </div>
       </section>

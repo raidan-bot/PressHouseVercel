@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Send, AlertCircle, CheckCircle2, Loader2, Paperclip } from 'lucide-react';
 import { api } from '../services/api';
+import { cn } from '../lib/utils';
 
 export default function ViolationForm({ onSuccess }: { onSuccess: () => void }) {
   const { i18n } = useTranslation();
@@ -321,8 +322,4 @@ export default function ViolationForm({ onSuccess }: { onSuccess: () => void }) 
       </div>
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }

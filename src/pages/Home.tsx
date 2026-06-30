@@ -19,8 +19,19 @@ import { ProjectGrid } from '../components/projects/ProjectGrid';
 import { api } from '../services/api';
 import { SEO } from '../components/common/SEO';
 
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '../lib/utils';
+
+// UI Components
+import {
+  Button,
+  Badge,
+  Card,
+  CardBody,
+  EmptyState as UIEmptyState,
+  ScrollReveal,
+  StaggerContainer,
+  StaggerItem,
+} from '../components/ui';
 
 // Swiper for news slider
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -28,10 +39,6 @@ import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export default function Home() {
   const { i18n } = useTranslation();
@@ -312,58 +319,46 @@ export default function Home() {
       {statsToRender.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 md:mb-20">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] mb-4 md:mb-6"
-            >
-              <Zap size={12} className="fill-current" />
-              {isRtl ? 'تأثيرنا بالأرقام' : 'Our Impact in Numbers'}
-            </motion.div>
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-2xl sm:text-4xl md:text-6xl font-black text-slate-900 tracking-tight"
-            >
-              {isRtl ? 'إنجازات نفخر بها' : 'Achievements We Are Proud Of'}
-            </motion.h2>
+            <ScrollReveal direction="up">
+              <Badge variant="primary" dot={false}>
+                <Zap size={12} className="fill-current" />
+                {isRtl ? 'تأثيرنا بالأرقام' : 'Our Impact in Numbers'}
+              </Badge>
+            </ScrollReveal>
+            <ScrollReveal direction="up">
+              <h2 className="text-2xl sm:text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
+                {isRtl ? 'إنجازات نفخر بها' : 'Achievements We Are Proud Of'}
+              </h2>
+            </ScrollReveal>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-12">
             {statsToRender.map((stat: any, idx: number) => {
               const icons = [ShieldAlert, Users, GraduationCap, FileText];
               const colors = ['text-red-600', 'text-blue-600', 'text-amber-600', 'text-emerald-600'];
-              const bg = 'bg-white';
               const Icon = icons[idx % icons.length];
               const color = colors[idx % colors.length];
 
               return (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, rotateX: -15, y: 20 }}
-                  whileInView={{ opacity: 1, rotateX: 0, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, duration: 0.6, type: 'spring' }}
-                  className="relative group p-6 rounded-3xl bg-white border border-slate-100 shadow-sm transition-all duration-500 overflow-hidden"
-                >
-                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-current/10", color, "bg-slate-50")}>
-                    <Icon size={28} />
-                  </div>
-                  <div className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter mb-1">
-                      {stat.renderedValue}
-                  </div>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">{isRtl ? stat.labelAr : stat.labelEn}</div>
-                </motion.div>
+                <ScrollReveal key={idx} direction="up" delay={idx * 0.1}>
+                  <Card hover className="p-6 overflow-hidden">
+                    <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-current/10", color, "bg-slate-50")}>
+                      <Icon size={28} />
+                    </div>
+                    <div className="text-2xl md:text-3xl font-black text-slate-900 tracking-tighter mb-1">
+                        {stat.renderedValue}
+                    </div>
+                    <div className="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">{isRtl ? stat.labelAr : stat.labelEn}</div>
+                  </Card>
+                </ScrollReveal>
               );
             })}
           </div>
           
           {/* Add a professional Chart here - using a placeholder for now as I need to figure out data structure */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm h-64 flex items-center justify-center text-slate-400">
+          <Card className="p-6 h-64 flex items-center justify-center text-slate-400">
              {isRtl ? 'رسوم بيانية احترافية لمؤشرات الأداء (سيتم عرضها هنا)' : 'Professional Performance Indicator Charts (will be displayed here)'}
-          </div>
+          </Card>
         </section>
       )}
 
@@ -376,30 +371,21 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-3 gap-10 md:gap-16 items-start">
             <div className="lg:col-span-1 space-y-6 md:space-y-8 lg:sticky lg:top-32">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em]"
-              >
-                <MousePointer2 size={12} />
-                {isRtl ? 'ماذا نقدم؟' : 'What We Offer?'}
-              </motion.div>
+              <ScrollReveal direction="left">
+                <Badge variant="primary" dot={false}>
+                  <MousePointer2 size={12} />
+                  {isRtl ? 'ماذا نقدم؟' : 'What We Offer?'}
+                </Badge>
+              </ScrollReveal>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-[1.1] tracking-tight">
                 {isRtl ? programsIntro.title.ar : programsIntro.title.en}
               </h2>
               <p className="text-slate-400 text-sm md:text-lg leading-relaxed">
                 {isRtl ? programsIntro.text.ar : programsIntro.text.en}
               </p>
-              <Link to="/about" className="group inline-flex items-center gap-4 text-white font-black uppercase tracking-widest text-[11px] md:text-sm hover:text-blue-400 transition-colors">
-                <span className="relative">
-                  {isRtl ? 'تعرف على المزيد' : 'Learn More'}
-                  <div className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-                </span>
-                <div className={cn("w-10 h-10 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-blue-600 group-hover:border-blue-600 transition-all", isRtl && "rotate-180")}>
-                  <ArrowRight size={18} />
-                </div>
-              </Link>
+              <Button to="/about" variant="outline" size="lg" icon={<ArrowRight size={18} />} iconPosition="right" className="!text-white !border-white/30 hover:!bg-white/10">
+                {isRtl ? 'تعرف على المزيد' : 'Learn More'}
+              </Button>
             </div>
             
             <div className="lg:col-span-2 grid md:grid-cols-2 gap-6 md:gap-8">
@@ -444,8 +430,12 @@ export default function Home() {
                   );
                 })
               ) : (
-                <div className="lg:col-span-2 flex items-center justify-center p-12 text-white/50 bg-white/5 rounded-3xl border border-white/10">
-                  {isRtl ? 'لا توجد مشاريع مضافة حالياً.' : 'No projects added currently.'}
+                <div className="lg:col-span-2">
+                  <UIEmptyState
+                    title={isRtl ? 'لا توجد مشاريع' : 'No Projects'}
+                    description={isRtl ? 'لا توجد مشاريع مضافة حالياً.' : 'No projects added currently.'}
+                    icon={<ShieldCheck size={48} />}
+                  />
                 </div>
               )}
             </div>
@@ -456,15 +446,12 @@ export default function Home() {
       {/* Observatory & Map Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         <div className="text-center space-y-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-[0.2em]"
-          >
-            <ShieldAlert size={12} />
-            {isRtl ? 'مرصد الانتهاكات' : 'Violations Observatory'}
-          </motion.div>
+          <ScrollReveal direction="up">
+            <Badge variant="danger" dot={false}>
+              <ShieldAlert size={12} />
+              {isRtl ? 'مرصد الانتهاكات' : 'Violations Observatory'}
+            </Badge>
+          </ScrollReveal>
           <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-[1.1] tracking-tight">
             {isRtl ? 'خريطة الانتهاكات التفاعلية' : 'Interactive Violations Map'}
           </h2>
@@ -486,18 +473,18 @@ export default function Home() {
         
         {/* Violation Statistics Charts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-           <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+           <Card className="p-8">
              <h3 className="text-xl font-black mb-6">{isRtl ? 'توزيع الانتهاكات حسب النوع' : 'Violations Distribution by Type'}</h3>
              <div className="h-64">
                {/* Recharts PieChart here */}
              </div>
-           </div>
-           <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+           </Card>
+           <Card className="p-8">
              <h3 className="text-xl font-black mb-6">{isRtl ? 'الانتهاكات عبر الزمن' : 'Violations Over Time'}</h3>
              <div className="h-64">
                {/* Recharts BarChart here */}
              </div>
-           </div>
+           </Card>
         </div>
       </section>
 
@@ -525,23 +512,19 @@ export default function Home() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 md:gap-8 mb-10 md:mb-20">
             <div className="space-y-3 md:space-y-4">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-[0.2em]"
-              >
-                <Newspaper size={12} />
-                {isRtl ? 'آخر المستجدات' : 'Latest Updates'}
-              </motion.div>
+              <ScrollReveal direction="left">
+                <Badge variant="warning" dot={false}>
+                  <Newspaper size={12} />
+                  {isRtl ? 'آخر المستجدات' : 'Latest Updates'}
+                </Badge>
+              </ScrollReveal>
               <h2 className="text-2xl md:text-6xl font-black text-slate-900 tracking-tight">
                 {isRtl ? 'أخبار وتقارير' : 'News & Reports'}
               </h2>
             </div>
-            <Link to="/news" className="group flex items-center gap-3 px-6 py-3.5 md:px-8 md:py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95">
+            <Button to="/news" variant="outline" size="md" icon={<ArrowRight size={18} />} iconPosition="right">
               {isRtl ? 'عرض كافة الأخبار' : 'View All News'}
-              <ArrowRight size={18} className={cn("transition-transform group-hover:translate-x-1", isRtl && "rotate-180 group-hover:-translate-x-1")} />
-            </Link>
+            </Button>
           </div>
 
           <Swiper
@@ -627,19 +610,14 @@ export default function Home() {
             { name: 'مؤسسة ألف لدعم وحماية التعليم', logo: 'https://ui-avatars.com/api/?name=Alef&background=e2e8f0&color=1e293b&size=100' },
             { name: 'تكتل وهج الشبابي', logo: 'https://ui-avatars.com/api/?name=Wahaj&background=e2e8f0&color=1e293b&size=100' }
           ].map((partner, i) => (
-            <motion.div 
-              key={i}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="flex flex-col items-center gap-4 bg-white px-8 py-8 rounded-[32px] border border-slate-100 hover:border-blue-200 hover:shadow-xl transition-all grayscale hover:grayscale-0 group w-48 text-center"
-            >
-              <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
-                <img src={partner.logo} alt={partner.name} className="w-full h-full object-contain" />
-              </div>
-              <span className="font-bold text-slate-700 text-sm leading-tight">{partner.name}</span>
-            </motion.div>
+            <ScrollReveal key={i} direction="up" delay={i * 0.1}>
+              <Card hover className="flex flex-col items-center gap-4 px-8 py-8 w-48 text-center grayscale hover:grayscale-0">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
+                  <img src={partner.logo} alt={partner.name} className="w-full h-full object-contain" />
+                </div>
+                <span className="font-bold text-slate-700 text-sm leading-tight">{partner.name}</span>
+              </Card>
+            </ScrollReveal>
           ))}
         </div>
       </section>
@@ -660,12 +638,12 @@ export default function Home() {
               {isRtl ? 'تمكين الكلمة الحرة' : 'of empowering the free word'}
             </h2>
             <div className="flex flex-wrap justify-center gap-6">
-              <Link to="/projects" className="px-12 py-5 bg-white text-blue-600 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-blue-50 transition-colors shadow-xl inline-block">
+              <Button to="/projects" variant="primary" size="2xl" className="!bg-white !text-blue-600 hover:!bg-blue-50 !shadow-xl">
                 {isRtl ? 'شاهد مشاريعنا' : 'View Our Projects'}
-              </Link>
-              <Link to="/contact" className="px-12 py-5 bg-transparent border-2 border-white/30 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-colors inline-block">
+              </Button>
+              <Button to="/contact" variant="outline" size="2xl" className="!text-white !border-white/30 hover:!bg-white/10">
                 {isRtl ? 'تواصل معنا' : 'Contact Us'}
-              </Link>
+              </Button>
             </div>
           </div>
         </motion.div>

@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PlayCircle, Clock, BookOpen, Star, ArrowRight, GraduationCap, Award, Users, Search, Loader2, Radio, User } from 'lucide-react';
+import { PlayCircle, Clock, BookOpen, Star, ArrowRight, GraduationCap, Award, Users, Radio, User } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
-import { Breadcrumbs } from '../components/common/Breadcrumbs';
+import { HeroBanner } from '../components/common/HeroBanner';
+import { SearchFilterBar } from '../components/common/SearchFilterBar';
+import { CardGridSkeleton } from '../components/common/Skeleton';
+import { EmptyState } from '../components/common/EmptyState';
+import { Pagination } from '../components/common/Pagination';
 import { motion, AnimatePresence } from 'motion/react';
 import { Course } from '../types';
 import { api } from '../services/api';
+
+const PAGE_SIZE = 8;
 
 export default function Academy() {
   const { i18n } = useTranslation();
@@ -13,6 +19,7 @@ export default function Academy() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [settings, setSettings] = useState<any>(null);
 
   useEffect(() => {
@@ -58,7 +65,6 @@ export default function Academy() {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-        // Fallback static list on error as well
         const backupCourses = [
           {
             id: 'c1',
@@ -84,52 +90,45 @@ export default function Academy() {
     course.title?.[isRtl ? 'ar' : 'en']?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredCourses.length / PAGE_SIZE);
+  const paginatedCourses = filteredCourses.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   const ongoingCourse = courses.find(c => c.isLive && c.liveUrl);
+
+  const seoTitle = isRtl ? 'أكاديمية بيت الصحافة | منصة تعليمية للصحفيين' : 'Press House Academy | Educational Platform for Journalists';
+  const seoDescription = isRtl 
+    ? 'نمكن الصحفيين اليمنيين بأحدث المهارات والأدوات لمواكبة التطورات العالمية في مجال الإعلام الرقمي والصحافة الاستقصائية.'
+    : 'Empowering Yemeni journalists with the latest skills and tools to keep pace with global developments in digital media and investigative journalism.';
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Hero Section */}
-      <section className="relative h-[60vh] flex items-center overflow-hidden bg-blue-900">
-        <div className="absolute inset-0 z-0">
-          <img 
-            src="https://picsum.photos/seed/academy-hero/1920/1080" 
-            alt="Academy Hero" 
-            className="w-full h-full object-cover opacity-30"
-            referrerPolicy="no-referrer"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-900 via-blue-900/50 to-transparent" />
-        </div>
+      <SEO 
+        title={seoTitle}
+        description={seoDescription}
+        type="website"
+      />
 
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-3xl space-y-6"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-sm font-bold backdrop-blur-sm">
-              <GraduationCap size={16} />
-              {isRtl ? 'منصة تعليمية متخصصة' : 'Specialized Educational Platform'}
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight">
-              {isRtl ? 'أكاديمية بيت الصحافة' : 'Press House Academy'}
-            </h1>
-            <p className="text-xl text-blue-100/80 leading-relaxed max-w-2xl">
-              {isRtl 
-                ? 'نمكن الصحفيين اليمنيين بأحدث المهارات والأدوات لمواكبة التطورات العالمية في مجال الإعلام الرقمي والصحافة الاستقصائية.' 
-                : 'Empowering Yemeni journalists with the latest skills and tools to keep pace with global developments in digital media and investigative journalism.'}
-            </p>
-            <div className="flex flex-wrap gap-4 pt-4">
-              <button className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2">
-                {isRtl ? 'ابدأ التعلم الآن' : 'Start Learning Now'}
-                <ArrowRight size={20} className={isRtl ? 'rotate-180' : ''} />
-              </button>
-              <button className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-8 py-4 rounded-2xl font-bold hover:bg-white/20 transition-all">
-                {isRtl ? 'تصفح المسارات' : 'Browse Tracks'}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <HeroBanner
+        title={isRtl ? 'أكاديمية بيت الصحافة' : 'Press House Academy'}
+        subtitle={isRtl 
+          ? 'نمكن الصحفيين اليمنيين بأحدث المهارات والأدوات لمواكبة التطورات العالمية في مجال الإعلام الرقمي والصحافة الاستقصائية.'
+          : 'Empowering Yemeni journalists with the latest skills and tools to keep pace with global developments in digital media and investigative journalism.'}
+        badge={isRtl ? 'منصة تعليمية متخصصة' : 'Specialized Educational Platform'}
+        badgeIcon={<GraduationCap size={16} />}
+        background="blue"
+        primaryCta={{
+          label: isRtl ? 'ابدأ التعلم الآن' : 'Start Learning Now',
+          href: '#courses',
+        }}
+        secondaryCta={{
+          label: isRtl ? 'تصفح المسارات' : 'Browse Tracks',
+          href: '#courses',
+        }}
+        className="mt-20"
+      />
 
       {/* Live Stream Section (Happening Now) */}
       <AnimatePresence>
@@ -163,6 +162,7 @@ export default function Academy() {
                     src={ongoingCourse.liveUrl}
                     className="w-full h-full border-0"
                     allowFullScreen
+                    title={ongoingCourse?.title?.[isRtl ? 'ar' : 'en']}
                   />
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function Academy() {
       </section>
 
       {/* Courses Grid */}
-      <section className="container mx-auto px-4 py-24 space-y-12">
+      <section id="courses" className="container mx-auto px-4 py-24 space-y-12">
         {settings?.youtubePlaylistUrl && (
           <div className="mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-8">{isRtl ? 'قناتنا على يوتيوب' : 'Our YouTube Channel'}</h2>
@@ -210,10 +210,12 @@ export default function Academy() {
                 className="w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                title="YouTube Playlist"
               />
             </div>
           </div>
         )}
+
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <div className="space-y-4">
             <h2 className="text-4xl font-bold text-slate-900">{isRtl ? 'استكشف الدورات' : 'Explore Courses'}</h2>
@@ -221,107 +223,117 @@ export default function Academy() {
               {isRtl ? 'اختر من بين مجموعة واسعة من الدورات المتخصصة التي يقدمها خبراء في مجال الإعلام.' : 'Choose from a wide range of specialized courses offered by media experts.'}
             </p>
           </div>
-          <div className="flex gap-4">
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder={isRtl ? 'بحث عن دورة...' : 'Search for a course...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-6 py-4 bg-white rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none w-64 md:w-80 transition-all shadow-sm"
-              />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-            </div>
-          </div>
         </div>
 
+        <SearchFilterBar
+          searchValue={searchQuery}
+          onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
+          searchPlaceholder={isRtl ? 'بحث عن دورة...' : 'Search for a course...'}
+        />
+
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="animate-spin text-blue-600" size={48} />
-          </div>
+          <CardGridSkeleton count={4} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredCourses.map((course, i) => (
-              <motion.div 
-                key={course.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
-              >
-                <div className="aspect-[4/3] relative overflow-hidden">
-                  <img 
-                    src={course.announcementImage || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=800'} 
-                    alt={course.title[isRtl ? 'ar' : 'en']} 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-blue-600 text-[10px] font-bold uppercase tracking-wider shadow-sm">
-                      {isRtl ? 'دورة تدريبية' : 'Training Course'}
-                    </span>
-                  </div>
-                  {course.isLive && (
-                    <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 rounded-full bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                        {isRtl ? 'مباشر' : 'LIVE'}
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {paginatedCourses.map((course, i) => (
+                <motion.div 
+                  key={course.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="group bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500"
+                >
+                  <div className="aspect-[4/3] relative overflow-hidden">
+                    <img 
+                      src={course.announcementImage || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&q=80&w=800'} 
+                      alt={course.title[isRtl ? 'ar' : 'en']} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-blue-600 text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                        {isRtl ? 'دورة تدريبية' : 'Training Course'}
                       </span>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-blue-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-500">
-                      <PlayCircle size={32} className="text-blue-600" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-8 space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-1 text-amber-500 text-sm font-bold">
-                      <Star size={14} fill="currentColor" />
-                      4.9
-                      <span className="text-slate-300 font-normal ml-1">(120+)</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
-                      {course.title[isRtl ? 'ar' : 'en']}
-                    </h3>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 border border-slate-200">
-                        {course.trainer.photoUrl ? (
-                          <img 
-                            src={course.trainer.photoUrl} 
-                            alt={course.trainer.name[isRtl ? 'ar' : 'en']}
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-slate-400">
-                            <User size={14} />
-                          </div>
-                        )}
+                    {course.isLive && (
+                      <div className="absolute top-4 right-4">
+                        <span className="px-3 py-1 rounded-full bg-rose-600 text-white text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          {isRtl ? 'مباشر' : 'LIVE'}
+                        </span>
                       </div>
-                      <p className="text-sm text-slate-400 font-medium">
-                        {isRtl ? 'بواسطة' : 'By'} {course.trainer.name[isRtl ? 'ar' : 'en']}
-                      </p>
+                    )}
+                    <div className="absolute inset-0 bg-blue-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-2xl transform scale-50 group-hover:scale-100 transition-transform duration-500">
+                        <PlayCircle size={32} className="text-blue-600" />
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
-                    <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
-                      <span className="flex items-center gap-1"><Clock size={14} /> {isRtl ? 'قريباً' : 'Soon'}</span>
-                      <span className="flex items-center gap-1">
-                        <BookOpen size={14} /> 
-                        {course.videos?.length || 0} {isRtl ? 'دروس' : 'Lessons'}
-                      </span>
+                  <div className="p-8 space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1 text-amber-500 text-sm font-bold">
+                        <Star size={14} fill="currentColor" />
+                        4.9
+                        <span className="text-slate-300 font-normal ml-1">(120+)</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-tight">
+                        {course.title[isRtl ? 'ar' : 'en']}
+                      </h3>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-100 border border-slate-200">
+                          {course.trainer.photoUrl ? (
+                            <img 
+                              src={course.trainer.photoUrl} 
+                              alt={course.trainer.name[isRtl ? 'ar' : 'en']}
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-400">
+                              <User size={14} />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-400 font-medium">
+                          {isRtl ? 'بواسطة' : 'By'} {course.trainer.name[isRtl ? 'ar' : 'en']}
+                        </p>
+                      </div>
                     </div>
-                    <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all">
-                      <ArrowRight size={18} className={isRtl ? 'rotate-180' : ''} />
-                    </button>
+                    
+                    <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
+                      <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
+                        <span className="flex items-center gap-1"><Clock size={14} /> {isRtl ? 'قريباً' : 'Soon'}</span>
+                        <span className="flex items-center gap-1">
+                          <BookOpen size={14} /> 
+                          {course.videos?.length || 0} {isRtl ? 'دروس' : 'Lessons'}
+                        </span>
+                      </div>
+                      <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all">
+                        <ArrowRight size={18} className={isRtl ? 'rotate-180' : ''} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {filteredCourses.length === 0 && (
+              <EmptyState
+                title={isRtl ? 'لا توجد دورات مطابقة' : 'No Courses Found'}
+                description={isRtl ? 'لم نعثر على دورات تطابق بحثك. حاول استخدام كلمات مختلفة.' : 'We couldn\'t find any courses matching your search. Try different keywords.'}
+                icon={<BookOpen className="w-8 h-8" />}
+              />
+            )}
+
+            {filteredCourses.length > PAGE_SIZE && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </>
         )}
 
         <div className="flex justify-center pt-12">

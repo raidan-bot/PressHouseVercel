@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'motion/react';
 import { FileText, Calendar, Shield, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '../components/common/SEO';
+import { Card, Badge, ScrollReveal, StaggerContainer, StaggerItem } from '../components/ui';
 
 export default function Terms() {
   const { i18n } = useTranslation();
@@ -27,15 +27,16 @@ export default function Terms() {
         </div>
 
         {/* Hero Header */}
+        <ScrollReveal className="w-full">
         <div className="bg-slate-900 rounded-[40px] p-12 md:p-16 text-white relative overflow-hidden shadow-2xl shadow-slate-900/10">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent" />
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
           
           <div className="relative z-10 space-y-6">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-blue-400 text-xs font-black uppercase tracking-widest">
+            <Badge variant="info" size="sm" className="uppercase tracking-widest bg-white/5 border border-white/10 text-blue-400">
               <FileText size={14} />
               {isRtl ? 'وثيقة تنظيمية' : 'Regulatory Document'}
-            </div>
+            </Badge>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
               {isRtl ? 'شروط الخدمة لموقع بيت الصحافة' : 'Terms of Service for Press House'}
             </h1>
@@ -52,9 +53,11 @@ export default function Terms() {
             </div>
           </div>
         </div>
+        </ScrollReveal>
 
         {/* Terms Content Card */}
-        <div className="bg-white rounded-[40px] border border-slate-100 p-8 md:p-16 shadow-sm space-y-10 text-slate-700 leading-relaxed text-base font-medium">
+        <ScrollReveal direction="none" delay={0.15}>
+        <Card variant="bordered" padding="lg" className="rounded-[40px] p-8 md:p-16 space-y-10 text-slate-700 leading-relaxed text-base font-medium">
           
           <div className="space-y-4">
             <h2 className="text-2xl font-black text-slate-900 flex items-center gap-3">
@@ -298,7 +301,8 @@ export default function Terms() {
             باستخدامكم لمنصة بيت الصحافة، فإنكم تقرون بقراءة وفهم وقبول شروط الخدمة هذه بالكامل.
           </div>
 
-        </div>
+        </Card>
+        </ScrollReveal>
       </div>
     </div>
   );

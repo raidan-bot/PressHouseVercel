@@ -2734,15 +2734,7 @@ function getS3Client(customConfig?: { accessKeyId?: string; secretAccessKey?: st
   return null;
 }
 
-app.get('/api/s3/config', (req, res) => {
-  const configured = !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_S3_BUCKET);
-  res.json({
-    configured,
-    bucket: process.env.AWS_S3_BUCKET || '',
-    region: process.env.AWS_REGION || 'us-east-1',
-    mode: configured ? 'production' : 'sandbox'
-  });
-});
+// REMOVED: /api/s3/config endpoint for security (was leaking S3 configuration details)
 
 app.post('/api/s3/list', authenticateToken, requireStaff, async (req, res) => {
   try {

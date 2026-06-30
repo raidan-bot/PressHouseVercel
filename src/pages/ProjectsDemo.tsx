@@ -9,14 +9,9 @@ import {
   Video, Gavel, GraduationCap,
   ArrowRight, Sparkles, LayoutGrid, Monitor, Smartphone, Tablet
 } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { useResponsiveLayout } from '../components/ResponsiveLayoutWrapper';
 import { SEO } from '../components/common/SEO';
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+import { cn } from '../lib/utils';
 
 export default function ProjectsDemo() {
   const { i18n } = useTranslation();

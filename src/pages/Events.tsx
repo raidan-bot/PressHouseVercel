@@ -1,12 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, MapPin, Share2, Play, Image as ImageIcon, Video, Clock, ArrowRight, ExternalLink, Radio } from 'lucide-react';
+import { Calendar, MapPin, Share2, Video, Clock, ArrowRight, ExternalLink, Image as ImageIcon, Radio } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { Event } from '../types';
 import { api } from '../services/api';
 import { ShareModal } from '../components/ShareModal';
 import { SEO } from '../components/common/SEO';
+import { SearchFilterBar } from '../components/common/SearchFilterBar';
+import { CardGridSkeleton } from '../components/common/Skeleton';
+// UI Components
+import {
+  PageHero,
+  Button,
+  Card,
+  CardBody,
+  Badge,
+  Pagination as UIPagination,
+  EmptyState as UIEmptyState,
+  StaggerContainer,
+  StaggerItem,
+  ScrollReveal,
+} from '../components/ui';
+
+const PAGE_SIZE = 6;
 
 export default function Events() {
   const { t, i18n } = useTranslation();
@@ -14,6 +31,7 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'ongoing' | 'completed'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
   const [shareEvent, setShareEvent] = useState<Event | null>(null);
 
   useEffect(() => {
@@ -39,6 +57,13 @@ export default function Events() {
   }, []);
 
   const filteredEvents = events.filter(e => filter === 'all' || e.status === filter);
+
+  const totalPages = Math.ceil(filteredEvents.length / PAGE_SIZE);
+  const paginatedEvents = filteredEvents.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   const ongoingEvent = events.find(e => e.isLive && e.liveStreamUrl);
 
   const handleShare = (event: Event) => {
@@ -49,14 +74,20 @@ export default function Events() {
   const seoDescription = isRtl 
     ? 'تابع أحدث الفعاليات، الندوات، والمؤتمرات التي ننظمها لتعزيز المشهد الإعلامي.' 
     : 'Follow the latest events, seminars, and conferences we organize to enhance the media landscape.';
-  const seoKeywords = isRtl ? 'فعاليات اليمن, مؤتمرات الصحافة, ندوات حريات الإعلام' : 'yemen events, press conferences, media freedom seminars';
+
+  const filterOptions = [
+    { value: 'all', label: isRtl ? 'الكل' : 'All' },
+    { value: 'upcoming', label: isRtl ? 'القادمة' : 'Upcoming' },
+    { value: 'ongoing', label: isRtl ? 'الحالية' : 'Ongoing' },
+    { value: 'completed', label: isRtl ? 'السابقة' : 'Past' },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <SEO 
         title={seoTitle}
         description={seoDescription}
-        keywords={seoKeywords}
+        keywords={isRtl ? 'فعاليات اليمن, مؤتمرات الصحافة, ندوات حريات الإعلام' : 'yemen events, press conferences, media freedom seminars'}
         type="website"
       />
       <ShareModal 
@@ -66,27 +97,21 @@ export default function Events() {
         url={window.location.origin + '/events/' + shareEvent?.id}
         description={shareEvent?.description[isRtl ? 'ar' : 'en']}
       />
-      {/* Hero Section */}
-      <section className="page-hero">
-        <div className="container mx-auto px-4 relative z-10 text-center space-y-4">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-blue-600 border border-blue-100 text-xs font-black uppercase tracking-widest"
-          >
-            <Calendar size={14} />
-            {isRtl ? 'الفعاليات والمؤتمرات' : 'Events & Conferences'}
-          </motion.div>
-          <h1 className="text-5xl md:text-7xl">
-            {isRtl ? 'فعاليات بيت الصحافة' : 'Press House Events'}
-          </h1>
-          <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed font-medium">
-            {isRtl 
-              ? 'تابع أحدث الفعاليات، الندوات، والمؤتمرات التي ننظمها لتعزيز المشهد الإعلامي.' 
-              : 'Follow the latest events, seminars, and conferences we organize to enhance the media landscape.'}
-          </p>
-        </div>
-      </section>
+
+      <PageHero
+        title={isRtl ? 'فعاليات بيت الصحافة' : 'Press House Events'}
+        subtitle={isRtl 
+          ? 'تابع أحدث الفعاليات، الندوات، والمؤتمرات التي ننظمها لتعزيز المشهد الإعلامي.' 
+          : 'Follow the latest events, seminars, and conferences we organize to enhance the media landscape.'}
+        size="md"
+        pattern="dots"
+        className="mt-20"
+      >
+        <Badge variant="primary" size="lg" className="inline-flex items-center gap-2">
+          <Calendar size={14} />
+          {isRtl ? 'الفعاليات والمؤتمرات' : 'Events & Conferences'}
+        </Badge>
+      </PageHero>
 
       {/* Live Stream Section (Happening Now) */}
       <AnimatePresence>
@@ -131,6 +156,7 @@ export default function Events() {
                       src={ongoingEvent.liveStreamUrl}
                       className="w-full h-full border-0"
                       allowFullScreen
+                      title={ongoingEvent.title[isRtl ? 'ar' : 'en']}
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-white/40 space-y-4">
@@ -145,166 +171,159 @@ export default function Events() {
         )}
       </AnimatePresence>
 
-      {/* Filter Bar */}
+      {/* Filters */}
       <section className="container mx-auto px-4 py-12">
-        <div className="flex flex-wrap items-center justify-center gap-4">
-          {[
-            { id: 'all', label: isRtl ? 'الكل' : 'All' },
-            { id: 'upcoming', label: isRtl ? 'القادمة' : 'Upcoming' },
-            { id: 'ongoing', label: isRtl ? 'الحالية' : 'Ongoing' },
-            { id: 'completed', label: isRtl ? 'السابقة' : 'Past' },
-          ].map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setFilter(item.id as any)}
-              className={`px-8 py-3 rounded-2xl font-bold transition-all ${
-                filter === item.id 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' 
-                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <ScrollReveal direction="up" delay={0.2}>
+          <div className="bg-white rounded-2xl md:rounded-[32px] shadow-2xl shadow-slate-200/50 p-5 md:p-8 border border-slate-100">
+            <SearchFilterBar
+              filters={[{
+                value: filter,
+                onChange: (v) => { setFilter(v as any); setCurrentPage(1); },
+                options: filterOptions,
+              }]}
+            />
+          </div>
+        </ScrollReveal>
       </section>
 
       {/* Events Grid */}
       <section className="container mx-auto px-4 pb-24">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white rounded-[40px] aspect-[4/5] animate-pulse" />
-            ))}
-          </div>
-        ) : filteredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredEvents.map((event, i) => (
-              <motion.div
-                key={event.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-white rounded-[40px] border border-slate-100 shadow-sm hover:shadow-2xl transition-all overflow-hidden flex flex-col"
-              >
-                <div className="relative aspect-video overflow-hidden">
-                  <img 
-                    src={event.image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800'} 
-                    alt={event.title[isRtl ? 'ar' : 'en']}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border ${
-                      event.status === 'upcoming' ? 'bg-blue-500/80 text-white border-blue-400' :
-                      event.status === 'ongoing' ? 'bg-rose-500/80 text-white border-rose-400' :
-                      'bg-slate-500/80 text-white border-slate-400'
-                    }`}>
-                      {event.status === 'upcoming' ? (isRtl ? 'قادمة' : 'Upcoming') :
-                       event.status === 'ongoing' ? (isRtl ? 'مباشر' : 'Live') :
-                       (isRtl ? 'منتهية' : 'Completed')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-8 space-y-6 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-blue-600" />
-                      {new Date(event.date).toLocaleDateString(isRtl ? 'ar-YE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+          <CardGridSkeleton count={3} />
+        ) : paginatedEvents.length > 0 ? (
+          <>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {paginatedEvents.map((event) => (
+                <StaggerItem key={event.id} direction="up">
+                  <Card as="article" variant="elevated" padding="none" className="group h-full overflow-hidden rounded-3xl md:rounded-[40px]">
+                    <div className="relative aspect-video overflow-hidden">
+                      <img 
+                        src={event.image || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80&w=800'} 
+                        alt={event.title[isRtl ? 'ar' : 'en']}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-4 right-4">
+                        <Badge
+                          variant={
+                            event.status === 'upcoming' ? 'info' :
+                            event.status === 'ongoing' ? 'danger' :
+                            'neutral'
+                          }
+                          size="sm"
+                          className="backdrop-blur-md"
+                        >
+                          {event.status === 'upcoming' ? (isRtl ? 'قادمة' : 'Upcoming') :
+                           event.status === 'ongoing' ? (isRtl ? 'مباشر' : 'Live') :
+                           (isRtl ? 'منتهية' : 'Completed')}
+                        </Badge>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} className="text-blue-600" />
-                      {event.location[isRtl ? 'ar' : 'en']}
-                    </div>
-                  </div>
 
-                  <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                    {event.title[isRtl ? 'ar' : 'en']}
-                  </h3>
+                    <CardBody className="p-8 space-y-6 flex flex-col flex-1">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-blue-600" />
+                          {new Date(event.date).toLocaleDateString(isRtl ? 'ar-YE' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin size={14} className="text-blue-600" />
+                          {event.location[isRtl ? 'ar' : 'en']}
+                        </div>
+                      </div>
 
-                  <p className="text-slate-500 line-clamp-3 text-sm leading-relaxed">
-                    {event.description[isRtl ? 'ar' : 'en']}
-                  </p>
+                      <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                        {event.title[isRtl ? 'ar' : 'en']}
+                      </h3>
 
-                  <div className="pt-6 mt-auto border-t border-slate-100 flex items-center justify-between">
-                    <button 
-                      onClick={() => handleShare(event)}
-                      className="p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all"
-                    >
-                      <Share2 size={20} />
-                    </button>
-                    <Link 
-                      to={`/events/${event.id}`}
-                      className="flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all"
-                    >
-                      {isRtl ? 'التفاصيل' : 'Details'}
-                      <ArrowRight size={20} className={isRtl ? 'rotate-180' : ''} />
-                    </Link>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                      <p className="text-slate-500 line-clamp-3 text-sm leading-relaxed">
+                        {event.description[isRtl ? 'ar' : 'en']}
+                      </p>
+
+                      <div className="pt-6 mt-auto border-t border-slate-100 flex items-center justify-between">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          icon={<Share2 size={16} />}
+                          onClick={() => handleShare(event)}
+                          className="rounded-xl"
+                        />
+                        <Link 
+                          to={`/events/${event.id}`}
+                          className="flex items-center gap-2 text-blue-600 font-bold hover:gap-3 transition-all"
+                        >
+                          {isRtl ? 'التفاصيل' : 'Details'}
+                          <ArrowRight size={20} className={isRtl ? 'rotate-180' : ''} />
+                        </Link>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+
+            <div className="mt-12">
+              <UIPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </>
         ) : (
-          <div className="bg-white p-24 rounded-[48px] border-2 border-dashed border-slate-200 text-center space-y-6">
-            <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
-              <Calendar size={48} />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-2xl font-bold text-slate-900">{isRtl ? 'لا توجد فعاليات حالياً' : 'No events found'}</h3>
-              <p className="text-slate-500">{isRtl ? 'يرجى مراجعة الصفحة لاحقاً لمتابعة أحدث فعالياتنا.' : 'Please check back later to follow our latest events.'}</p>
-            </div>
-          </div>
+          <UIEmptyState
+            title={isRtl ? 'لا توجد فعاليات حالياً' : 'No Events Found'}
+            description={isRtl ? 'يرجى مراجعة الصفحة لاحقاً لمتابعة أحدث فعالياتنا.' : 'Please check back later to follow our latest events.'}
+            icon={<Calendar className="w-8 h-8" />}
+          />
         )}
       </section>
 
       {/* Media Highlights Section */}
       <section className="bg-white py-24 border-t border-slate-100">
         <div className="container mx-auto px-4 space-y-12">
-          <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-            <div className="space-y-4">
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-                {isRtl ? 'المواد الإعلامية للفعاليات' : 'Event Media Highlights'}
-              </h2>
-              <p className="text-xl text-slate-500">
-                {isRtl ? 'لقطات وصور من أبرز فعالياتنا السابقة.' : 'Snapshots and photos from our most prominent past events.'}
-              </p>
+          <ScrollReveal direction="up">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+              <div className="space-y-4">
+                <h2 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
+                  {isRtl ? 'المواد الإعلامية للفعاليات' : 'Event Media Highlights'}
+                </h2>
+                <p className="text-xl text-slate-500">
+                  {isRtl ? 'لقطات وصور من أبرز فعالياتنا السابقة.' : 'Snapshots and photos from our most prominent past events.'}
+                </p>
+              </div>
+              <Button variant="primary" size="md" icon={<ExternalLink size={20} />} iconPosition="right">
+                {isRtl ? 'مشاهدة الكل' : 'View All Media'}
+              </Button>
             </div>
-            <button className="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all flex items-center gap-2">
-              {isRtl ? 'مشاهدة الكل' : 'View All Media'}
-              <ExternalLink size={20} />
-            </button>
-          </div>
+          </ScrollReveal>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <motion.div
-                key={i}
-                whileHover={{ scale: 1.02 }}
-                className="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer"
-              >
-                <img 
-                  src={`https://images.unsplash.com/photo-${[
-                    '1504711434969-e33886168f5c',
-                    '1495020689067-958852a7765e',
-                    '1585829365294-bb7520c35c7a',
-                    '1504711434969-e33886168f5c',
-                    '1495020689067-958852a7765e',
-                    '1585829365294-bb7520c35c7a',
-                    '1504711434969-e33886168f5c',
-                    '1495020689067-958852a7765e'
-                  ][i-1]}?auto=format&fit=crop&q=80&w=600&h=600`} 
-                  alt="Media" 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  {i % 3 === 0 ? <Video size={32} className="text-white" /> : <ImageIcon size={32} className="text-white" />}
+              <StaggerItem key={i} direction="up">
+                <div className="relative aspect-square rounded-3xl overflow-hidden group cursor-pointer">
+                  <img 
+                    src={`https://images.unsplash.com/photo-${[
+                      '1504711434969-e33886168f5c',
+                      '1495020689067-958852a7765e',
+                      '1585829365294-bb7520c35c7a',
+                      '1504711434969-e33886168f5c',
+                      '1495020689067-958852a7765e',
+                      '1585829365294-bb7520c35c7a',
+                      '1504711434969-e33886168f5c',
+                      '1495020689067-958852a7765e'
+                    ][i-1]}?auto=format&fit=crop&q=80&w=600&h=600`} 
+                    alt="Media" 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    {i % 3 === 0 ? <Video size={32} className="text-white" /> : <ImageIcon size={32} className="text-white" />}
+                  </div>
                 </div>
-              </motion.div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
     </div>
