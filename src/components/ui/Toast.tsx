@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
@@ -22,6 +22,9 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+// Global toast dispatcher for convenience functions
+let globalAddToast: ((toast: Omit<ToastMessage, 'id'>) => void) | null = null;
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -39,6 +42,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  // Register global dispatcher
+  useEffect(() => {
+    globalAddToast = addToast;
+    return () => { globalAddToast = null; };
+  }, [addToast]);
 
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
@@ -63,7 +72,7 @@ function ToastContainer() {
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 pointer-events-none">
       <AnimatePresence>
         {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} onRemove={() => removeToast(toast.id)} />
+          <ToastItem toast={toast} onRemove={() => removeToast(toast.id)} />
         ))}
       </AnimatePresence>
     </div>,
@@ -115,23 +124,19 @@ function ToastItem({ toast, onRemove }: { toast: ToastMessage; onRemove: () => v
   );
 }
 
-// Convenience hooks
+// Convenience functions — use global dispatcher, no hook needed
 export function toastSuccess(title: string, description?: string) {
-  const { addToast } = useToast();
-  addToast({ type: 'success', title, description });
+  globalAddToast?.({ type: 'success', title, description });
 }
 
 export function toastError(title: string, description?: string) {
-  const { addToast } = useToast();
-  addToast({ type: 'error', title, description });
+  globalAddToast?.({ type: 'error', title, description });
 }
 
 export function toastWarning(title: string, description?: string) {
-  const { addToast } = useToast();
-  addToast({ type: 'warning', title, description });
+  globalAddToast?.({ type: 'warning', title, description });
 }
 
 export function toastInfo(title: string, description?: string) {
-  const { addToast } = useToast();
-  addToast({ type: 'info', title, description });
+  globalAddToast?.({ type: 'info', title, description });
 }

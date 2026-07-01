@@ -37,7 +37,7 @@ export function DatePicker({
   }, []);
 
   // Generate calendar days
-  const getDaysInMonth = (date:Coroutine) => {
+  const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date .getMonth();
     const firstDay = new Date(year, month, 1);

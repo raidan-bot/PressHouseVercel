@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar';
-import { MessageCircle, ThumbsUp, Reply, Flag, MoreHorizontal } from 'lucide-react';
+import { ThumbsUp, Reply, Flag } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Button } from './Button';
 
@@ -93,7 +92,7 @@ export function CommentThread({
                   key={reply.id}
                   comment={reply}
                   onReply={() => setReplyingTo(reply.id)}
-                  onLike={() => onesse?.(reply.id)}
+                  onLike={() => onLike?.(reply.id)}
                   onReport={() => onReport?.(reply.id)}
                   isReply
                 />
@@ -106,19 +105,22 @@ export function CommentThread({
   );
 }
 
+interface CommentItemProps {
+  comment: Comment;
+  onReply: () => void;
+  onLike: () => void;
+  onReport: () => void;
+  isReply?: boolean;
+  key?: React.Key;
+}
+
 function CommentItem({
   comment,
   onReply,
   onLike,
   onReport,
   isReply = false,
-}: {
-  comment: Comment;
-  onReply: () => void;
-  onLike: () => void;
-  onReport: () => void;
-  isReply?: boolean;
-}) {
+}: CommentItemProps) {
   return (
     <div className={cn('flex gap-3', isReply && 'mt-4')}>
       {/* Avatar */}
@@ -175,4 +177,5 @@ function CommentItem({
   );
 }
 
+export { CommentItem };
 export default CommentThread;

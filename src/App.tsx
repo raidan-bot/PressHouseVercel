@@ -30,6 +30,7 @@ import VolunteerOpportunityDetail from './pages/VolunteerOpportunityDetail';
 import './i18n';
 
 import { Toaster } from 'react-hot-toast';
+import { ToastProvider } from './components/ui/Toast';
 import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -137,8 +138,9 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <HelmetProvider>
-      <Toaster position="top-right" />
-      <AuthProvider>
+      <ToastProvider>
+        <Toaster position="top-right" />
+        <AuthProvider>
         <Router>
           <Layout>
             <AnimatedRoutes />
@@ -146,6 +148,7 @@ export default function App() {
           <PressAgentChat />
         </Router>
       </AuthProvider>
+      </ToastProvider>
     </HelmetProvider>
   );
 }

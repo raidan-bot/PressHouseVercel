@@ -17,7 +17,7 @@ export type { ColumnDef, DataTableProps } from './DataTable';
 export { ToastProvider, useToast, toastSuccess, toastError, toastWarning, toastInfo } from './Toast';
 export type { ToastType, ToastMessage } from './Toast';
 export { Modal, ConfirmModal, useModal, ModalProvider } from './Modal';
-export type { ModalProps, ConfirmModalProps } from '../types/modal';
+export type { ModalProps, ConfirmModalProps } from '../../types/modal';
 export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
 
 // === Phase 2: High Priority Components ===
@@ -35,8 +35,8 @@ export { Stepper, Step } from './Stepper';
 export { Calendar } from './Calendar';
 
 // === Phase 4: Low Priority Components ===
-export { Chart, ChartBar, ChartLine, ChartPie } from './Chart';
+export { BarChart, LineChart, PieChart } from './Chart';
 export { KanbanBoard, KanbanColumn, KanbanCard } from './KanbanBoard';
-export { Timeline, TimelineItem } from './Timeline';
+export { Timeline } from './Timeline';
 export { CommentThread, CommentItem } from './CommentThread';
-export { ResizablePanel, ResizablePanelGroup } from './ResizablePanel';
+export { ResizablePanel } from './ResizablePanel';

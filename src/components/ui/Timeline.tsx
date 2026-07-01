@@ -37,15 +37,18 @@ export function Timeline({ items, className, variant = 'vertical' }: TimelinePro
   );
 }
 
+interface TimelineItemProps {
+  item: TimelineItemData;
+  isLast: boolean;
+  variant: 'vertical' | 'horizontal';
+  key?: React.Key;
+}
+
 function TimelineItem({
   item,
   isLast,
   variant,
-}: {
-  item: TimelineItemData;
-  isLast: boolean;
-  variant: string;
-}) {
+}: TimelineItemProps) {
   const statusColors = {
     completed: 'bg-blue-600',
     current: 'bg-blue-500 animate-pulse',

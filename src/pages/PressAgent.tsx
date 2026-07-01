@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { Wand2, Sparkles, FileText, Headline, Newspaper, Share2, Send } from 'lucide-react';
+import { Wand2, Sparkles, FileText, Heading, Newspaper, Share2, Send } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
 import { PageHero } from '../components/ui/PageHero';
 import { Card } from '../components/ui/Card';
@@ -27,7 +27,7 @@ export default function PressAgent() {
     setLoading(true);
     try {
       const result = await pressAgentService.generateContent({
-        type: 'b popup content', content: '', context: ''
+        type: 'article', content: '', context: ''
       });
       setGenerated(prev => [...prev, result]);
     } catch (error) {

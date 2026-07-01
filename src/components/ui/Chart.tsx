@@ -134,5 +134,3 @@ export function PieChart({ data, className }: PieChartProps) {
     </div>
   );
 }
-
-export default { BarChart, LineChart, PieChart };
