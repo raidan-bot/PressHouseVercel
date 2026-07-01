@@ -515,3 +515,40 @@ CREATE TABLE IF NOT EXISTS yemenjpt_beta_registrations (
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Cinema Wednesday - Movie showcase table
+CREATE TABLE IF NOT EXISTS cinema_movies (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title JSON NOT NULL,
+  description JSON,
+  genre JSON,
+  imdb_id VARCHAR(50),
+  trailer_url TEXT,
+  poster_url TEXT,
+  release_year INT,
+  director VARCHAR(255),
+  duration_minutes INT,
+  rating DECIMAL(3,1),
+  status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
+  show_on_home BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- API Key Management System
+CREATE TABLE IF NOT EXISTS api_keys (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  key_hash VARCHAR(255) NOT NULL UNIQUE,
+  key_prefix VARCHAR(8) NOT NULL,
+  user_id VARCHAR(255),
+  roles JSON,
+  permissions JSON,
+  scopes JSON,
+  last_used_at TIMESTAMP,
+  expires_at TIMESTAMP,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_by VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+

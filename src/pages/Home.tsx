@@ -8,7 +8,8 @@ import {
   Sparkles, Zap, 
   MousePointer2,
   ShieldCheck, Search, Database,
-  Target, Award, Handshake
+  Target, Award,   Handshake,
+  Film
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { YemenJPTSection } from '../components/YemenJPTSection';
@@ -55,6 +56,7 @@ export default function Home() {
   const [comprehensiveStats, setComprehensiveStats] = React.useState<any>(null);
   const [liveIndicators, setLiveIndicators] = React.useState<any[]>([]);
   const [violations, setViolations] = React.useState<any[]>([]);
+  const [cinemaCount, setCinemaCount] = React.useState<number>(0);
 
   React.useEffect(() => {
     const fetchHomeContent = async () => {
@@ -101,6 +103,16 @@ export default function Home() {
       }
     };
     fetchViolations();
+
+    const fetchCinemaCount = async () => {
+      try {
+        const { data } = await api.get('/api/cinema/movies/count');
+        setCinemaCount(data.count || 0);
+      } catch (err) {
+        console.error("Error fetching cinema movies count:", err);
+      }
+    };
+    fetchCinemaCount();
   }, []);
 
   const statsByGov = React.useMemo(() => {
@@ -122,7 +134,8 @@ export default function Home() {
       { type: 'system', metricId: 'total_volunteers', ar: '120+', en: '120+', labelAr: 'متطوع مسجل', labelEn: 'Registered Volunteers', descAr: 'متطوعون ومناصرون مسجلون', descEn: 'Registered volunteers and advocates' },
       { type: 'custom', ar: '12+', en: '12+', labelAr: 'دراسات وبحوث معمقة', labelEn: 'Studies & Deep Research', descAr: 'تقارير بحثية وأكاديمية متخصصة', descEn: 'Specialized research & academic reports' },
       { type: 'custom', ar: '48+', en: '48+', labelAr: 'تقارير رصد دورية', labelEn: 'Periodic Monitoring Reports', descAr: 'توثيق دوري وشامل للحقوق والحريات', descEn: 'Periodic and comprehensive documentation of rights & freedoms' },
-      { type: 'custom', ar: '35+', en: '35+', labelAr: 'مؤسسات شريكة', labelEn: 'Partner Institutions', descAr: 'شبكة علاقات محلية ودولية', descEn: 'Local and international relationship network' }
+      { type: 'custom', ar: '35+', en: '35+', labelAr: 'مؤسسات شريكة', labelEn: 'Partner Institutions', descAr: 'شبكة علاقات محلية ودولية', descEn: 'Local and international relationship network' },
+      { type: 'cinema', ar: cinemaCount.toString(), en: cinemaCount.toString(), labelAr: 'فيلم معروض', labelEn: 'Movies Displayed', descAr: 'سينما الأربعاء - أفلام مستقلة ووثائقية', descEn: 'Cinema Wednesday - Independent and Documentary Films' }
     ]
   };
 

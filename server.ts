@@ -5491,6 +5491,34 @@ app.get('/api/analytics/impact', async (req, res) => {
   }
 });
 
+// Cinema Wednesday API
+app.get('/api/cinema/movies/count', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT COUNT(*) as count FROM cinema_movies WHERE status = ?', ['published']);
+    const count = (rows as any[])[0]?.count || 0;
+    res.json({ count: Number(count) });
+  } catch (error: any) {
+    console.error('Cinema movies count error:', error);
+    if (error.code === 'ECONNREFUSED' || (error.message && error.message.includes('ECONNREFUSED')) || error.code === 'ER_NO_SUCH_TABLE') {
+      return res.json({ count: 0 });
+    }
+    res.status(500).json({ message: 'Error fetching cinema movies count', details: error.message, code: error.code });
+  }
+});
+
+app.get('/api/cinema/movies', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM cinema_movies WHERE status = ? ORDER BY created_at DESC', ['published']);
+    res.json(rows);
+  } catch (error: any) {
+    console.error('Cinema movies error:', error);
+    if (error.code === 'ECONNREFUSED' || (error.message && error.message.includes('ECONNREFUSED')) || error.code === 'ER_NO_SUCH_TABLE') {
+      return res.json([]);
+    }
+    res.status(500).json({ message: 'Error fetching cinema movies', details: error.message, code: error.code });
+  }
+});
+
 // Hero Slides API
 app.get('/api/heroSlides', async (req, res) => {
   try {
