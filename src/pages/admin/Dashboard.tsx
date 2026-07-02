@@ -68,6 +68,7 @@ import SEOManager from './SEOManager';
 import ApiExplorer from './ApiExplorer';
 import PerformanceReport from './PerformanceReport';
 import HermesAgentPanel from './HermesAgentPanel';
+import ApiKeyManager from './ApiKeyManager';
 import InstitutionIdentityManager from './InstitutionIdentityManager';
 import HRManager from './HRManager';
 import SectorManager from './SectorManager';
@@ -147,6 +148,7 @@ export default function AdminDashboard() {
       items: [
         { id: 'hermes', path: 'hermes', icon: BrainCircuit, label: isRtl ? 'وكيل هيرمس' : 'Hermes AI Agent' },
         { id: 'api', path: 'api', icon: Terminal, label: isRtl ? 'مستكشف API' : 'API Explorer' },
+        { id: 'apikeys', path: 'apikeys', icon: Key, label: isRtl ? 'مفاتيح API' : 'API Keys' },
         { id: 'seo', path: 'seo', icon: Globe, label: isRtl ? 'إدارة SEO' : 'SEO Manager' },
       ]
     },
@@ -272,6 +274,7 @@ export default function AdminDashboard() {
             <Route path="/hr" element={<HRManager />} />
             <Route path="/sectors" element={<SectorManager />} />
             <Route path="/partners" element={<PartnerManager />} />
+            <Route path="/apikeys" element={<ApiKeyManager />} />
           </Routes>
         </main>
       </div>

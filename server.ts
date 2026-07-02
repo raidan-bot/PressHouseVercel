@@ -6910,6 +6910,180 @@ app.post('/api/mcp/execute', authenticateToken, requireAdmin, async (req, res) =
   }
 });
 
+// =============================================================================
+// API KEY MANAGEMENT ENDPOINTS (External App Integration)
+// =============================================================================
+
+// List all API keys (admin only)
+app.get('/api/keys', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT id, name, key_prefix, user_id, roles, permissions, scopes, last_used_at, expires_at, is_active, created_by, created_at, updated_at FROM api_keys ORDER BY created_at DESC'
+    );
+    res.json(rows || []);
+  } catch (error) {
+    console.error('API Error (/api/keys):', error);
+    res.status(500).json({ error: 'Failed to fetch API keys' });
+  }
+});
+
+// Create a new API key
+app.post('/api/keys', async (req, res) => {
+  try {
+    const { name, user_id, roles, permissions, scopes, expires_at } = req.body;
+    if (!name) return res.status(400).json({ error: 'Name is required' });
+
+    // Generate a secure API key (ph_ prefix + 48 chars alphanumeric)
+    const crypto = await import('crypto');
+    const randomBytes = crypto.default ? crypto.default.randomBytes(48) : crypto.randomBytes(48);
+    const rawKey = 'ph_' + randomBytes.toString('base64').replace(/[+/=]/g, '').substring(0, 48);
+
+    // Hash the key for storage
+    const keyHash = await bcrypt.hash(rawKey, 12);
+    const keyPrefix = rawKey.substring(0, 8);
+
+    const [result] = await pool.query(
+      'INSERT INTO api_keys (name, key_hash, key_prefix, user_id, roles, permissions, scopes, expires_at, is_active, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        name,
+        keyHash,
+        keyPrefix,
+        user_id || null,
+        JSON.stringify(roles || ['external_user']),
+        JSON.stringify(permissions || ['read']),
+        JSON.stringify(scopes || ['articles', 'events', 'cinema']),
+        expires_at || null,
+        true,
+        req.headers['x-user-id'] || 'system'
+      ]
+    );
+
+    res.json({
+      id: (result as any).insertId,
+      name,
+      key_prefix: keyPrefix,
+      full_key: rawKey, // only shown once at creation
+      user_id: user_id || null,
+      roles,
+      permissions,
+      scopes,
+      expires_at: expires_at || null,
+      is_active: true,
+      message: 'Key created. Save the full_key immediately - it will not be shown again.'
+    });
+  } catch (error) {
+    console.error('API Error (POST /api/keys):', error);
+    res.status(500).json({ error: 'Failed to create API key' });
+  }
+});
+
+// Verify an API key (for external app authentication)
+app.post('/api/keys/verify', async (req, res) => {
+  try {
+    const { apiKey } = req.body;
+    if (!apiKey) return res.status(400).json({ error: 'API key is required' });
+
+    const [rows]: any = await pool.query('SELECT id, key_hash FROM api_keys WHERE is_active = TRUE');
+    let matchedKey = null;
+
+    for (const record of (rows || [])) {
+      if (await bcrypt.compare(apiKey, record.key_hash)) {
+        matchedKey = record;
+        break;
+      }
+    }
+
+    if (!matchedKey) {
+      return res.status(401).json({ valid: false, error: 'Invalid API key' });
+    }
+
+    await pool.query('UPDATE api_keys SET last_used_at = CURRENT_TIMESTAMP WHERE id = ?', [matchedKey.id]);
+    res.json({ valid: true, message: 'API key is valid' });
+  } catch (error) {
+    console.error('API Error (POST /api/keys/verify):', error);
+    res.status(500).json({ error: 'Failed to verify API key' });
+  }
+});
+
+// Delete an API key
+app.delete('/api/keys/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM api_keys WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('API Error (DELETE /api/keys):', error);
+    res.status(500).json({ error: 'Failed to delete API key' });
+  }
+});
+
+// =============================================================================
+// CINEMA WEDNESDAY - PUBLIC MOVIE ENDPOINTS
+// =============================================================================
+
+// List movies (public)
+app.get('/api/cinema/movies', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const status = req.query.status as string;
+    const search = req.query.search as string;
+    let sql = 'SELECT id, title, description, genre, imdb_id, trailer_url, poster_url, release_year, director, duration_minutes, rating, status, show_on_home, created_at FROM cinema_movies';
+    const params: any[] = [];
+    const conditions: string[] = [];
+
+    if (status) {
+      conditions.push('status = ?');
+      params.push(status);
+    }
+    if (search) {
+      // search in title JSON - simple LIKE search
+      conditions.push(`(title LIKE ? OR genre LIKE ? OR director LIKE ?)`);
+      params.push(`%${search}%`);
+      params.push(`%${search}%`);
+      params.push(`%${search}%`);
+    }
+
+    if (conditions.length > 0) {
+      sql += ' WHERE ' + conditions.join(' AND ');
+    }
+    sql += ` ORDER BY created_at DESC LIMIT ?`;
+    params.push(limit);
+
+    const [rows] = await pool.query(sql, params);
+    res.json(rows || []);
+  } catch (error) {
+    console.error('API Error (/api/cinema/movies):', error);
+    res.status(500).json({ error: 'Failed to fetch movies' });
+  }
+});
+
+// Get total movie count
+app.get('/api/cinema/movies/count', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT COUNT(*) as count FROM cinema_movies');
+    const count = (rows as any[])[0]?.count || 0;
+    res.json({ count });
+  } catch (error) {
+    console.error('API Error (/api/cinema/movies/count):', error);
+    res.status(500).json({ error: 'Failed to count movies' });
+  }
+});
+
+// Get single movie
+app.get('/api/cinema/movies/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM cinema_movies WHERE id = ?', [req.params.id]);
+    if ((rows as any[]).length === 0) return res.status(404).json({ error: 'Movie not found' });
+    res.json((rows as any[])[0]);
+  } catch (error) {
+    console.error('API Error (GET /api/cinema/movies/:id):', error);
+    res.status(500).json({ error: 'Failed to fetch movie' });
+  }
+});
+
+// =============================================================================
+//数字经济 and social dev sys
+// =============================================================================
+
 import { seedDatabase } from './src/seed';
 // Run database seed logic in background, robust for Vercel
 seedDatabase().catch(err => console.error("Database seeding failed:", err));
