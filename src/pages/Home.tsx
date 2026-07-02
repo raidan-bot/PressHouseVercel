@@ -347,10 +347,41 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-12">
             {statsToRender.map((stat: any, idx: number) => {
-              const icons = [ShieldAlert, Users, GraduationCap, FileText];
-              const colors = ['text-red-600', 'text-blue-600', 'text-amber-600', 'text-emerald-600'];
-              const Icon = icons[idx % icons.length];
-              const color = colors[idx % colors.length];
+              let Icon: any;
+              let color: string;
+              
+              // Map stat types to icons and colors
+              switch (stat.type) {
+                case 'cinema':
+                  Icon = Film;
+                  color = 'text-purple-600';
+                  break;
+                case 'system':
+                  switch (stat.metricId) {
+                    case 'total_violations':
+                      Icon = ShieldAlert;
+                      color = 'text-red-600';
+                      break;
+                    case 'total_beneficiaries':
+                      Icon = Users;
+                      color = 'text-blue-600';
+                      break;
+                    case 'total_courses':
+                      Icon = GraduationCap;
+                      color = 'text-amber-600';
+                      break;
+                    default:
+                      Icon = FileText;
+                      color = 'text-emerald-600';
+                  }
+                  break;
+                default:
+                  // Fallback pattern for custom/other types
+                  const icons = [ShieldAlert, Users, GraduationCap, FileText];
+                  const colors = ['text-red-600', 'text-blue-600', 'text-amber-600', 'text-emerald-600'];
+                  Icon = icons[idx % icons.length];
+                  color = colors[idx % colors.length];
+              }
 
               return (
                 <ScrollReveal key={idx} direction="up" delay={idx * 0.1}>
