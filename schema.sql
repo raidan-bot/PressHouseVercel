@@ -552,3 +552,46 @@ CREATE TABLE IF NOT EXISTS api_keys (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- ================================================
+-- Violations Monitoring System Tables
+-- ================================================
+
+CREATE TABLE IF NOT EXISTS violations_monitoring (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  violation_id VARCHAR(255),
+  detection_type VARCHAR(255),
+  severity ENUM('critical', 'high', 'medium', 'low') NOT NULL DEFAULT 'medium',
+  status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+  detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ai_confidence DECIMAL(3,2) DEFAULT 0.5,
+  ai_analysis TEXT,
+  location_accuracy DECIMAL(5,2),
+  reviewed_by VARCHAR(255),
+  reviewed_at TIMESTAMP,
+  admin_notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS monitoring_alerts (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  type VARCHAR(255) NOT NULL,
+  severity ENUM('critical', 'high', 'medium', 'low') NOT NULL DEFAULT 'medium',
+  message TEXT NOT NULL,
+  related_violation_id VARCHAR(255),
+  status ENUM('active', 'resolved', 'dismissed') NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  resolved_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS monitoring_reports (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  type VARCHAR(50) DEFAULT 'comprehensive',
+  period_start TIMESTAMP,
+  period_end TIMESTAMP,
+  data_summary JSON,
+  generated_by VARCHAR(255),
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status VARCHAR(50) DEFAULT 'generated',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

@@ -76,6 +76,8 @@ import PartnerManager from './PartnerManager';
 import ArticleEditor from './ArticleEditor';
 import CategoryManager from './CategoryManager';
 import TagManager from './TagManager';
+import ViolationsMonitoringCenter from './ViolationsMonitoringCenter';
+import PressAgentDashboard from './PressAgent';
 
 export default function AdminDashboard() {
   const { i18n } = useTranslation();
@@ -275,6 +277,8 @@ export default function AdminDashboard() {
             <Route path="/sectors" element={<SectorManager />} />
             <Route path="/partners" element={<PartnerManager />} />
             <Route path="/apikeys" element={<ApiKeyManager />} />
+            <Route path="/violations-monitoring" element={<ViolationsMonitoringCenter />} />
+            <Route path="/pressagent" element={<PressAgentDashboard />} />
           </Routes>
         </main>
       </div>

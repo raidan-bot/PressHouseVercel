@@ -18,6 +18,7 @@ import axios from 'axios';
 import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { validateEnv } from './src/lib/env-validator';
 import { getPressAgent } from './src/services/pressAgent';
+import violationsMonitoringRoute from './src/routes/violationsMonitoring';
 dotenv.config();
 validateEnv();
 
@@ -6710,6 +6711,9 @@ app.put('/api/custom-lists/:key', async (req, res) => {
     res.status(500).json({ message: 'Error updating custom list' });
   }
 });
+
+// Violations Monitoring Routes
+app.use('/api/violations-monitoring', violationsMonitoringRoute);
 
 // Start Server & Vite
 async function startServer() {

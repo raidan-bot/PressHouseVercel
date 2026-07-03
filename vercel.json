@@ -1,13 +1,23 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "framework": "vite",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/uploads/(.*)", "destination": "/uploads/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/uploads/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ],
   "functions": {
-    "api/index.ts": {
-      "memory": 512,
+    "api/**/*.ts": {
       "maxDuration": 30
     }
   }
