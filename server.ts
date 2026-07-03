@@ -18,6 +18,20 @@ import axios from 'axios';
 import { S3Client, ListObjectsV2Command, GetObjectCommand, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { validateEnv } from './src/lib/env-validator';
 import { getPressAgent } from './src/services/pressAgent';
+import crypto from 'crypto';
+
+// JWT_SECRET utility - generates a random fallback if not set (secure by default)
+let _jwtSecretFallback: string | null = null;
+function getJwtSecret(): string {
+  const envSecret = process.env.JWT_SECRET;
+  if (envSecret) return envSecret;
+
+  if (!_jwtSecretFallback) {
+    _jwtSecretFallback = crypto.randomBytes(64).toString('hex');
+    console.warn('[SECURITY] JWT_SECRET not set! Generated a random fallback. Auth sessions will NOT persist across server restarts. Set JWT_SECRET for consistent sessions.');
+  }
+  return _jwtSecretFallback;
+}
 import violationsMonitoringRoute from './src/routes/violationsMonitoring';
 dotenv.config();
 validateEnv();
@@ -1594,7 +1608,7 @@ app.post('/api/auth/google', authLimiter, async (req, res) => {
       user = (newRows as any)[0];
     }
     
-    const token = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+    const token = jwt.sign({ uid: user.uid, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
     res.json({ token, user });
   } catch (err: any) {
     console.error('Core Google Auth error:', err);
@@ -2391,7 +2405,7 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       'INSERT INTO users (uid, email, password_hash, role) VALUES (?, ?, ?, ?)',
       [uid, email, hashedPassword, 'member']
     );
-    const token = jwt.sign({ uid, role: 'member' }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+    const token = jwt.sign({ uid, role: 'member' }, getJwtSecret(), { expiresIn: '7d' });
     res.status(201).json({ token, user: { uid, email, role: 'member', name: { ar: name, en: name } } });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -2406,7 +2420,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ uid: user.uid, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
+    const token = jwt.sign({ uid: user.uid, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
     // Remove password hash from response
     const { password_hash, ...userProfile } = user;
     res.json({ token, user: userProfile });
@@ -2420,7 +2434,7 @@ function authenticateToken(req: any, res: any, next: any) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (!token) return res.sendStatus(401);
-  jwt.verify(token, process.env.JWT_SECRET || 'secret', (err: any, user: any) => {
+  jwt.verify(token, getJwtSecret(), (err: any, user: any) => {
     if (err) return res.sendStatus(403);
     req.user = user;
     next();
