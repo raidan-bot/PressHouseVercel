@@ -39,7 +39,11 @@ bot.command("status", async (ctx) => {
   }
   
   try {
-    const response = await fetch(`${process.env.VITE_API_URL}/api/health`);
+    const apiUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}/api/health`
+      : `${process.env.VITE_API_URL || 'http://localhost:3000'}/api/health`;
+    
+    const response = await fetch(apiUrl);
     const data = await response.json();
     
     ctx.reply(`✅ حالة الموقع: ${data.status}\n` +

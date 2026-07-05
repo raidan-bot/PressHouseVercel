@@ -1,7 +1,7 @@
 import { api } from './api';
 
 const hermesChat = async (messages: { role: string; content: string }[]) => {
-  const response = await api.post('/v1/chat/completions', { messages });
+  const response = await api.post('/api/ai/chat', { messages });
   return response.data.choices?.[0]?.message?.content || '';
 };
 
