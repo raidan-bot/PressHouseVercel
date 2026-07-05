@@ -1217,12 +1217,13 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
 app.use(cors());
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' }, contentSecurityPolicy: false }));
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' }, contentSecurityPolicy: true }));
 app.use(express.json());
 
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { message: 'Too many requests, please try again later.' } });
 const uploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: { message: 'Too many uploads, please try again later.' } });
 const contactLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: { message: 'Too many messages, please try again later.' } });
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100, message: { message: 'Too many requests from this IP, please try again later.' } });
 
 // Setup storage folder
 const uploadDir = path.join(process.cwd(), 'uploads');
@@ -1232,6 +1233,9 @@ if (!fs.existsSync(uploadDir)) {
 
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadDir));
+
+// Apply general API rate limiter to all /api routes
+app.use('/api', apiLimiter);
 
 // Move role check definitions before their first use
 function requireRole(...roles: string[]) {
@@ -2754,6 +2758,18 @@ function getS3Client(customConfig?: { accessKeyId?: string; secretAccessKey?: st
 app.post('/api/s3/list', authenticateToken, requireStaff, async (req, res) => {
   try {
     const { customConfig } = req.body;
+    // Validate customConfig properties to prevent credential/endpoint injection
+    if (customConfig && typeof customConfig === 'object') {
+      const allowedKeys = ['accessKeyId', 'secretAccessKey', 'region', 'endpoint', 'bucket'];
+      for (const key of Object.keys(customConfig)) {
+        if (!allowedKeys.includes(key)) {
+          return res.status(400).json({ message: 'Invalid configuration key: ' + key });
+        }
+        if (typeof customConfig[key] !== 'string') {
+          return res.status(400).json({ message: 'Invalid configuration value for: ' + key });
+        }
+      }
+    }
     const client = getS3Client(customConfig);
     const bucket = customConfig?.bucket || process.env.AWS_S3_BUCKET;
 
