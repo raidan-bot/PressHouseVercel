@@ -14,24 +14,12 @@ import {
   Loader2,
 } from "lucide-react";
 import { motion } from "motion/react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import { Job } from "../../types";
 import { cn } from "../../lib/utils";
 import { translateText, generateSeoMetadata } from "../../services/AIService";
 import { api } from "../../services/api";
 import { SmartTranslate } from "../../components/admin/SmartTranslate";
-
-const quillModules = {
-  toolbar: [
-    [{ header: [1, 2, 3, false] }],
-    ["bold", "underline", "strike"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ direction: "rtl" }],
-    ["link", "blockquote", "code-block"],
-    ["clean"],
-  ],
-};
+import RichTextEditor from "../../components/admin/RichTextEditor";
 
 export default function JobEditor() {
   const { id } = useParams();
@@ -352,7 +340,7 @@ export default function JobEditor() {
                     {isRtl ? "المسمى الوظيفي بالعربية" : "Job Title in Arabic"}
                   </label>
                   <SmartTranslate
-                    sourceText={job.title?.en}
+                    text={job.title?.en}
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -388,7 +376,7 @@ export default function JobEditor() {
                     {isRtl ? "الموقع بالعربية" : "Location in Arabic"}
                   </label>
                   <SmartTranslate
-                    sourceText={job.location?.en}
+                    text={job.location?.en}
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -423,7 +411,7 @@ export default function JobEditor() {
                     {isRtl ? "وصف الوظيفة" : "Job Description"}
                   </label>
                   <SmartTranslate
-                    sourceText={job.description?.en}
+                    text={job.description?.en}
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -435,24 +423,22 @@ export default function JobEditor() {
                     }
                   />
                 </div>
-                <div className="quill-wrapper" dir="rtl">
-                  <ReactQuill
-                    theme="snow"
-                    value={job.description?.ar || ""}
-                    onChange={(content) =>
-                      setJob({
-                        ...job,
-                        description: {
-                          ...(job.description || { ar: "", en: "" }),
-                          ar: content,
-                        },
-                      })
-                    }
-                    modules={quillModules}
-                    placeholder="وصف الوظيفة بالعربية..."
-                    className="bg-white rounded-xl overflow-hidden"
-                  />
-                </div>
+                <RichTextEditor
+                  value={job.description?.ar || ""}
+                  onChange={(content) =>
+                    setJob({
+                      ...job,
+                      description: {
+                        ...(job.description || { ar: "", en: "" }),
+                        ar: content,
+                      },
+                    })
+                  }
+                  placeholder="وصف الوظيفة بالعربية..."
+                  dir="rtl"
+                  minHeight="200px"
+                  className="bg-white rounded-xl overflow-hidden"
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-1">
@@ -460,7 +446,7 @@ export default function JobEditor() {
                     {isRtl ? "المتطلبات" : "Requirements"}
                   </label>
                   <SmartTranslate
-                    sourceText={job.requirements?.en}
+                    text={job.requirements?.en}
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -472,24 +458,22 @@ export default function JobEditor() {
                     }
                   />
                 </div>
-                <div className="quill-wrapper" dir="rtl">
-                  <ReactQuill
-                    theme="snow"
-                    value={job.requirements?.ar || ""}
-                    onChange={(content) =>
-                      setJob({
-                        ...job,
-                        requirements: {
-                          ...(job.requirements || { ar: "", en: "" }),
-                          ar: content,
-                        },
-                      })
-                    }
-                    modules={quillModules}
-                    placeholder="المتطلبات بالعربية..."
-                    className="bg-white rounded-xl overflow-hidden"
-                  />
-                </div>
+                <RichTextEditor
+                  value={job.requirements?.ar || ""}
+                  onChange={(content) =>
+                    setJob({
+                      ...job,
+                      requirements: {
+                        ...(job.requirements || { ar: "", en: "" }),
+                        ar: content,
+                      },
+                    })
+                  }
+                  placeholder="المتطلبات بالعربية..."
+                  dir="rtl"
+                  minHeight="200px"
+                  className="bg-white rounded-xl overflow-hidden"
+                />
               </div>
             </div>
 
@@ -508,8 +492,8 @@ export default function JobEditor() {
                     Job Title in English
                   </label>
                   <SmartTranslate
-                    sourceText={job.title?.ar}
-                    targetLang="en"
+                    text={job.title?.ar}
+                    targetLanguage="en"
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -544,8 +528,8 @@ export default function JobEditor() {
                     Location in English
                   </label>
                   <SmartTranslate
-                    sourceText={job.location?.ar}
-                    targetLang="en"
+                    text={job.location?.ar}
+                    targetLanguage="en"
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -580,8 +564,8 @@ export default function JobEditor() {
                     Job Description in English
                   </label>
                   <SmartTranslate
-                    sourceText={job.description?.ar}
-                    targetLang="en"
+                    text={job.description?.ar}
+                    targetLanguage="en"
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -593,24 +577,21 @@ export default function JobEditor() {
                     }
                   />
                 </div>
-                <div className="quill-wrapper">
-                  <ReactQuill
-                    theme="snow"
-                    value={job.description?.en || ""}
-                    onChange={(content) =>
-                      setJob({
-                        ...job,
-                        description: {
-                          ...(job.description || { ar: "", en: "" }),
-                          en: content,
-                        },
-                      })
-                    }
-                    modules={quillModules}
-                    placeholder="Job description in English..."
-                    className="bg-white rounded-xl overflow-hidden"
-                  />
-                </div>
+                <RichTextEditor
+                  value={job.description?.en || ""}
+                  onChange={(content) =>
+                    setJob({
+                      ...job,
+                      description: {
+                        ...(job.description || { ar: "", en: "" }),
+                        en: content,
+                      },
+                    })
+                  }
+                  placeholder="Job description in English..."
+                  minHeight="200px"
+                  className="bg-white rounded-xl overflow-hidden"
+                />
               </div>
 
               <div className="space-y-2">
@@ -619,8 +600,8 @@ export default function JobEditor() {
                     Requirements in English
                   </label>
                   <SmartTranslate
-                    sourceText={job.requirements?.ar}
-                    targetLang="en"
+                    text={job.requirements?.ar}
+                    targetLanguage="en"
                     onTranslate={(text) =>
                       setJob({
                         ...job,
@@ -632,24 +613,21 @@ export default function JobEditor() {
                     }
                   />
                 </div>
-                <div className="quill-wrapper">
-                  <ReactQuill
-                    theme="snow"
-                    value={job.requirements?.en || ""}
-                    onChange={(content) =>
-                      setJob({
-                        ...job,
-                        requirements: {
-                          ...(job.requirements || { ar: "", en: "" }),
-                          en: content,
-                        },
-                      })
-                    }
-                    modules={quillModules}
-                    placeholder="Requirements in English..."
-                    className="bg-white rounded-xl overflow-hidden"
-                  />
-                </div>
+                <RichTextEditor
+                  value={job.requirements?.en || ""}
+                  onChange={(content) =>
+                    setJob({
+                      ...job,
+                      requirements: {
+                        ...(job.requirements || { ar: "", en: "" }),
+                        en: content,
+                      },
+                    })
+                  }
+                  placeholder="Requirements in English..."
+                  minHeight="200px"
+                  className="bg-white rounded-xl overflow-hidden"
+                />
               </div>
             </div>
           </div>

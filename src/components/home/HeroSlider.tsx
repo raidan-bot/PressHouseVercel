@@ -128,45 +128,45 @@ export const HeroSlider: React.FC = () => {
     }
   };
 
-  const getAnimationProps = (type: string, delay: number = 0, customType?: string) => {
+  const getAnimationProps = (type: string, delay: number = 0, customType?: string): Record<string, unknown> => {
     const animation = customType || type;
     switch (animation) {
       case 'slide':
         return {
           initial: { opacity: 0, x: isRtl ? 100 : -100 },
           whileInView: { opacity: 1, x: 0 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
         };
       case 'slide-up':
         return {
           initial: { opacity: 0, y: 100 },
           whileInView: { opacity: 1, y: 0 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
         };
       case 'slide-down':
         return {
           initial: { opacity: 0, y: -100 },
           whileInView: { opacity: 1, y: 0 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
         };
       case 'zoom':
       case 'scale-in':
         return {
           initial: { opacity: 0, scale: 0.8 },
           whileInView: { opacity: 1, scale: 1 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
         };
       case 'scale-up':
         return {
           initial: { opacity: 0, scale: 1.5 },
           whileInView: { opacity: 1, scale: 1 },
-          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] as const }
         };
       case 'scale-down':
         return {
           initial: { opacity: 0, scale: 0.5 },
           whileInView: { opacity: 1, scale: 1 },
-          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] }
+          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] as const }
         };
       case 'fade':
       case 'fade-in':
@@ -259,12 +259,12 @@ export const HeroSlider: React.FC = () => {
                       {slide.description[lang]}
                     </motion.p>
 
-                    {slide.type === 'violation-stats' && (slide as any).stats && (
+                    {(slide as any).type === 'violation-stats' && (slide as any).stats && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.95, y: 15 }}
                         whileInView={{ opacity: 1, scale: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
                         className="grid grid-cols-3 gap-4 max-w-xl w-full pt-2"
                       >
                         <div className="bg-slate-900/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex flex-col justify-between text-start hover:border-blue-500/30 transition-all">

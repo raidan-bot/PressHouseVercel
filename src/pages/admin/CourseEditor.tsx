@@ -1,8 +1,7 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-const ReactQuill = lazy(() => import("react-quill"));
-import "react-quill/dist/quill.snow.css";
+import RichTextEditor from "../../components/admin/RichTextEditor";
 import {
   Save,
   ArrowLeft,
@@ -28,22 +27,6 @@ import { useAuth } from "../../context/AuthContext";
 import { MediaLibraryModal } from "../../components/media/MediaLibraryModal";
 import { translateText, generateSeoMetadata } from "../../services/AIService";
 import { SmartTranslate } from "../../components/admin/SmartTranslate";
-
-const quillModules = {
-  toolbar: [
-    [{ header: [1, 2, 3, 4, 5, 6, false] }],
-    [{ font: [] }],
-    ["bold", "underline", "strike"],
-    [{ color: [] }, { background: [] }],
-    [{ script: "sub" }, { script: "super" }],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ indent: "-1" }, { indent: "+1" }],
-    [{ direction: "rtl" }],
-    [{ align: [] }],
-    ["link", "image", "video", "blockquote", "code-block"],
-    ["clean"],
-  ],
-};
 
 export default function CourseEditor() {
   const { id } = useParams();
@@ -299,7 +282,7 @@ export default function CourseEditor() {
                       {isRtl ? "العنوان (بالعربية)" : "Title (Arabic)"}
                     </label>
                     <SmartTranslate
-                      sourceText={course.title?.en}
+                      text={course.title?.en}
                       onTranslate={(text) =>
                         setCourse({
                           ...course,
@@ -327,8 +310,8 @@ export default function CourseEditor() {
                       {isRtl ? "العنوان (بالإنجليزية)" : "Title (English)"}
                     </label>
                     <SmartTranslate
-                      sourceText={course.title?.ar}
-                      targetLang="en"
+                      text={course.title?.ar}
+                      targetLanguage="en"
                       onTranslate={(text) =>
                         setCourse({
                           ...course,
@@ -358,7 +341,7 @@ export default function CourseEditor() {
                     {isRtl ? "الوصف (بالعربية)" : "Description (Arabic)"}
                   </label>
                   <SmartTranslate
-                    sourceText={course.description?.en}
+                    text={course.description?.en}
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -367,22 +350,16 @@ export default function CourseEditor() {
                     }
                   />
                 </div>
-                <div className="quill-wrapper" dir="rtl">
-                  <Suspense fallback={<Loader2 className="animate-spin" />}>
-                    <ReactQuill
-                      theme="snow"
-                      value={course.description?.ar || ""}
-                      onChange={(content) =>
-                        setCourse({
-                          ...course,
-                          description: { ...course.description!, ar: content },
-                        })
-                      }
-                      modules={quillModules}
-                      className="bg-white rounded-xl overflow-hidden min-h-[200px]"
-                    />
-                  </Suspense>
-                </div>
+                <RichTextEditor
+                    value={course.description?.ar || ""}
+                    onChange={(content) =>
+                      setCourse({
+                        ...course,
+                        description: { ...course.description!, ar: content },
+                      })
+                    }
+                    placeholder={isRtl ? "الوصف بالعربية..." : "Description in Arabic..."}
+                  />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-1">
@@ -390,8 +367,8 @@ export default function CourseEditor() {
                     {isRtl ? "الوصف (بالإنجليزية)" : "Description (English)"}
                   </label>
                   <SmartTranslate
-                    sourceText={course.description?.ar}
-                    targetLang="en"
+                    text={course.description?.ar}
+                    targetLanguage="en"
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -400,22 +377,16 @@ export default function CourseEditor() {
                     }
                   />
                 </div>
-                <div className="quill-wrapper">
-                  <Suspense fallback={<Loader2 className="animate-spin" />}>
-                    <ReactQuill
-                      theme="snow"
-                      value={course.description?.en || ""}
-                      onChange={(content) =>
-                        setCourse({
-                          ...course,
-                          description: { ...course.description!, en: content },
-                        })
-                      }
-                      modules={quillModules}
-                      className="bg-white rounded-xl overflow-hidden min-h-[200px]"
-                    />
-                  </Suspense>
-                </div>
+                <RichTextEditor
+                    value={course.description?.en || ""}
+                    onChange={(content) =>
+                      setCourse({
+                        ...course,
+                        description: { ...course.description!, en: content },
+                      })
+                    }
+                    placeholder={isRtl ? "الوصف بالإنجليزية..." : "Description in English..."}
+                  />
               </div>
             </div>
           </div>
@@ -434,7 +405,7 @@ export default function CourseEditor() {
                     {isRtl ? "اسم المدرب (بالعربية)" : "Trainer Name (Arabic)"}
                   </label>
                   <SmartTranslate
-                    sourceText={course.trainer?.name.en}
+                    text={course.trainer?.name.en}
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -469,8 +440,8 @@ export default function CourseEditor() {
                       : "Trainer Name (English)"}
                   </label>
                   <SmartTranslate
-                    sourceText={course.trainer?.name.ar}
-                    targetLang="en"
+                    text={course.trainer?.name.ar}
+                    targetLanguage="en"
                     onTranslate={(text) =>
                       setCourse({
                         ...course,

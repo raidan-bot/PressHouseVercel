@@ -12,23 +12,6 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { ImagePicker } from '../../components/admin/ImagePicker';
 import { SmartTranslate } from '../../components/admin/SmartTranslate';
-
-const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-    [{ 'font': [] }],
-    ['bold', 'underline', 'strike'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'script': 'sub' }, { 'script': 'super' }],
-    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-    [{ 'indent': '-1' }, { 'indent': '+1' }],
-    [{ 'direction': 'rtl' }],
-    [{ 'align': [] }],
-    ['link', 'image', 'video', 'blockquote', 'code-block'],
-    ['clean']
-  ],
-};
-
 export default function ArticleEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -335,7 +318,7 @@ export default function ArticleEditor() {
                         value={article.content?.ar || ''}
                         onChange={(content) => setArticle({ ...article, content: { ...article.content || { ar: '', en: '' }, ar: content } })}
                         placeholder="اكتب محتوى المقال والخبر الصحفي هنا باللغة العربية..."
-                        isRtl={true}
+                        dir="rtl"
                       />
                     </div>
                   </motion.div>
@@ -363,7 +346,7 @@ export default function ArticleEditor() {
                         value={article.content?.en || ''}
                         onChange={(content) => setArticle({ ...article, content: { ...article.content || { ar: '', en: '' }, en: content } })}
                         placeholder="Write article content here in English..."
-                        isRtl={false}
+                        dir="ltr"
                       />
                     </div>
                   </motion.div>

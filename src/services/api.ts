@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { trackApiPerformance } from '../utils/performance';
 
 // Get base URL considering local dev or production
-const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+const API_URL = import.meta.env?.VITE_API_URL || process.env.VITE_API_URL || '';
 
 export const api = axios.create({
   baseURL: API_URL,
