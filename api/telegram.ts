@@ -1,4 +1,4 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Telegraf } from "telegraf";
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN || "");

@@ -32,6 +32,7 @@
     "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.20.0",
     "@vercel/blob": "^2.4.0",
+    "@vercel/node": "^5.8.22",
     "axios": "^1.15.2",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.11.1",

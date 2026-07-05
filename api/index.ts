@@ -1,4 +1,4 @@
-import type_vercel from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -48,10 +48,11 @@ app.post("/api/ai/chat", async (req, res) => {
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
 
-      for await (const chunk of completion) {
-        res.write(`data: ${JSON.stringify(chunk)}\\n\\n`);
+      const streamIter = completion as AsyncIterable<any>;
+      for await (const chunk of streamIter) {
+        res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       }
-      res.write("data: [DONE]\\n\\n");
+      res.write("data: [DONE]\n\n");
       res.end();
     } else {
       res.json(completion);

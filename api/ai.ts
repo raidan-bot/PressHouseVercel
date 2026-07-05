@@ -1,8 +1,8 @@
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
-  apiKey: process.env.NVIDIA_API_KEY || "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",
+  apiKey: process.env.NVIDIA_API_KEY || "",
   baseURL: "https://integrate.api.nvidia.com/v1",
 });
 
@@ -43,8 +43,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.setHeader("Content-Type", "text/event-stream");
       res.setHeader("Cache-Control", "no-cache");
       res.setHeader("Connection", "keep-alive");
- SSE
-      for await (const chunk of completion) {
+
+      const stream = completion as AsyncIterable<any>;
+      for await (const chunk of stream) {
         res.write(`data: ${JSON.stringify(chunk)}\n\n`);
       }
       res.write("data: [DONE]\n\n");

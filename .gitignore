@@ -65,3 +65,6 @@ patch*.js
 # Uploads (use Vercel Blob instead)
 uploads/
 public/uploads/
+
+.vercel
+.env*
