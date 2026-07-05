@@ -11,7 +11,7 @@ import {
   Target, Award,   Handshake,
   Film
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { YemenJPTSection } from '../components/YemenJPTSection';
 import { HeroSlider } from '../components/home/HeroSlider';
 import { RealtimeViolationFeed } from '../components/home/RealtimeViolationFeed';
@@ -44,6 +44,7 @@ import 'swiper/css/navigation';
 export default function Home() {
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
+  const navigate = useNavigate();
 
   const [email, setEmail] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -194,7 +195,15 @@ export default function Home() {
     }).filter((s: any) => !s.hasNoData);
   }, [impactData, comprehensiveStats, liveIndicators, isRtl, getLiveMetricValue]);
 
-  const programsIntro = getSection('programs_intro') || {
+  const getStatLink = (metricId: string) => {
+    switch (metricId) {
+      case 'total_violations': return '/violations';
+      case 'total_beneficiaries': return '/projects';
+      case 'total_courses': return '/academy';
+      case 'total_volunteers': return '/volunteer';
+      default: return null;
+    }
+  };
     title: { ar: 'برامجنا الرئيسية لتمكين الإعلام', en: 'Our Main Programs to Empower Media' },
     text: { ar: 'نقدم حزمة متكاملة من الخدمات التي تضمن سلامة الصحفي واستمرارية عمله المهني بحرية واستقلالية.', en: 'We provide an integrated package of services that ensure the safety of the journalist and the continuity of their professional work freely and independently.' }
   };

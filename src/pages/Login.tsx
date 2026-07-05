@@ -5,7 +5,6 @@ import { Mail, Lock, LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'motion/react';
-import { supabase } from '../lib/db';
 
 export default function Login() {
   const { i18n } = useTranslation();
@@ -31,25 +30,6 @@ export default function Login() {
       setError(err.response?.data?.message || (isRtl ? 'خطأ في البريد الإلكتروني أو كلمة المرور' : 'Invalid email or password'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    setError(null);
-    try {
-      const { data, error: signInError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (signInError) throw signInError;
-      // Note: Supabase OAuth redirects the user. The session will be available upon return.
-    } catch (err: any) {
-      console.error(err);
-      setError(err?.message || (isRtl ? 'فشل تسجيل الدخول عبر جوجل' : 'Google login failed'));
-      setGoogleLoading(false);
     }
   };
 
