@@ -1,108 +1,160 @@
-# 🏛️ منصة بيت الصحافة المتكاملة (PressHouse CMS Platform)
+# PressHouse Vercel
 
-منصة رقمية سيادية متكاملة مصممة خصيصاً للمؤسسات الإعلامية ومنظمات المجتمع المدني وحقوق الإنسان في اليمن (**بيت الصحافة - اليمن**). يوفر النظام أدوات متقدمة لإدارة المحتوى الإخباري المهني، ومتابعة طلبات العضوية، ورصد وتوثيق الانتهاكات الميدانية ضد الصحفيين والحريات الإعلامية عبر مرصد مدمج متكامل (**YemenJPT Safety Observatory**).
+[![Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/press-house/ph-ye.org)
 
-تم تفعيل بنية تحتية سحابية متطورة وموحدة بالكامل، تدعم النشر السحابي التلقائي الخالي من الخوادم على **Vercel** و **Railway**، وتعتمد على محرك قاعدة بيانات هجين فائق الاستجابة لدعم كل من **SQLite** للتطوير المحلي و **PostgreSQL / MySQL** السحابية للإنتاج.
+## 🚀 Overview
 
----
+PressHouse Vercel is a modern, scalable content management system built for the PressHouse media platform. It features AI-powered content generation, real-time analytics, and seamless deployment on Vercel.
 
-## 🚀 نبذة عن النظام وأهدافه الاستراتيجية
-تم تصميم **بيت الصحافة** ليكون ركيزة رقمية تدعم الإعلام المستقل والنزيه في اليمن من خلال:
-1. **مرصد رصد الحريات الصحفية**: توثيق الانتهاكات والاعتداءات ضد الصحفيين بشكل فوري وجغرافي، والتحقق منها وتصدير تقارير حقوقية مدعومة بالأدلة.
-2. **منصة النشر والتحرير الصحفي**: إدارة المحتوى الإعلامي، ونشر الأخبار، والتقارير الحقوقية، والبيانات الصحفية والفعاليات بمحرر مرئي احترافي.
-3. **الوكيل الذكي Hermes Agent**: إدراج ونشر المحتوى تلقائياً وصياغة الأخبار صحفياً وتدقيقها بالذكاء الاصطناعي التوليدي عبر لوحة تحكم الوكيل المتطورة.
-4. **أكاديمية التدريب المهني**: دعم مهارات الصحفيين عبر إدارة الدورات والمناهج التدريبية والتسجيل فيها.
-5. **بوابة المطورين وإدارة واجهات الـ API**: توليد مفاتيح الوصول البرمجية الآمنة وقراءة الأخبار والبيانات عن بعد عبر واجهة RESTful قياسية.
+## ✨ Features
 
----
+- **AI-Powered Content**: Integrated with NVIDIA AI for intelligent content generation
+- **Real-time Analytics**: Live dashboard with visitor statistics
+- **Telegram Bot**: Admin notifications and control via Telegram
+- **Vercel Blob Storage**: Scalable file storage solution
+- **Neon PostgreSQL**: Serverless database for optimal performance
+- **Multi-language Support**: Arabic and English interfaces
 
-## 📂 هيكلية المشروع المعمارية (Project Directory Layout)
+## 🛠️ Tech Stack
 
-```text
-├── server.ts            # خادم Express الرئيسي للإنتاج والربط مع الوكيل الذكي ومنافذ الـ API
-├── setup.sh             # سكربت التثبيت السريع والتهيئة المحلية الموحدة للتطوير
-├── vercel.json          # ملف إعدادات التوجيه والنشر السحابي الخالي من الخوادم على Vercel
-├── src/                 # كود البرمجة والواجهات الأساسي لتطبيق الكلاينت (React 19 + Vite)
-│   ├── main.tsx         # ملف الإقلاع والربط بالـ DOM للـ React
-│   ├── App.tsx          # المكون الرئيسي لتفرع المسارات والتحكم بالنوافذ التفاعلية والأمنية
-│   ├── i18n.ts          # ميزة التوطين والترجمة الفورية للغتين العربية (RTL) والإنجليزية (LTR)
-│   ├── db.ts            # طبقة الاتصال بقاعدة البيانات وإدارة المهاجرات الفورية والدعم الثنائي (Postgres/SQLite)
-│   ├── components/      # المكونات التفاعلية المشتركة (شريط التنقل، القوائم، النوافذ، الإشعارات)
-│   │   ├── admin/       # كتل التحكم والوكيل الذكي Hermes ومحرر RichTextEditor ومستورد الفيسبوك
-│   │   ├── media/       # مكتبة الوسائط وإدارة الملفات المرفوعة ودمج S3
-│   │   └── home/        # كتل الصفحة الخارجية التفاعلية وموجز الانتهاكات ومؤشرات الأداء
-│   ├── pages/           # صفحات التطبيق المنقسمة حسب الأدوار والمهام
-│   │   ├── admin/       # لوحة تحكم المشرف العام الموحدة والمقسمة لفئات مصنفة
-│   │   │   ├── HermesAgentPanel.tsx       # لوحة الربط المتقدم مع الوكيل الذكي Hermes والمحاكاة الفورية
-│   │   │   ├── ApiExplorer.tsx            # مستودع المطورين وإدارة وتوليد مفاتيح API الفعالة ومستكشف العناوين
-│   │   │   ├── InstitutionIdentityManager # لوحة الهوية البصرية، الألوان، الخطوط والمشروع التأسيسي
-│   │   │   ├── HRManager.tsx              # إدارة الطاقم الإداري والوظيفي ومجلس الإدارة
-│   │   │   ├── SectorManager.tsx          # قطاعات العمل وتأثير التدريب والتنمية
-│   │   │   └── PartnerManager.tsx         # الشركاء والجهات المانحة والداعمين
+- **Frontend**: React 19, Vite, Tailwind CSS
+- **Backend**: Express.js, Vercel Serverless Functions
+- **Database**: Neon PostgreSQL
+- **Storage**: Vercel Blob
+- **AI**: NVIDIA API (GLM-5.2)
+- **Deployment**: Vercel
+
+## 📦 Installation
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Vercel CLI (optional)
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/press-house/ph-ye.org.git
+cd ph-ye.org
+
+# Run installation script
+chmod +x install.sh
+./install.sh
+
+# Or manually:
+npm install
+npm run build
 ```
 
+### Environment Setup
+
+1. Copy `.env.example` to `.env`
+2. Fill in all required environment variables
+3. Never commit `.env` to version control
+
+## 🔧 Configuration
+
+### Required Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | Neon PostgreSQL connection string | Yes |
+| `JWT_SECRET` | Secret key for JWT tokens | Yes |
+| `NVIDIA_API_KEY` | NVIDIA API key for AI features | Yes |
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token | Yes |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob token | Yes |
+
+### Optional Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NODE_ENV` | Environment mode | `production` |
+| `VITE_API_URL` | API base URL | `https://ph-ye.org` |
+| `REDIS_URL` | Redis connection string | - |
+
+## 🚀 Deployment
+
+### Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy
+vercel --prod
+```
+
+### Manual Deployment
+
+1. Push code to GitHub
+2. Import project in Vercel dashboard
+3. Add environment variables
+4. Deploy
+
+## 📁 Project Structure
+
+```
+ph-ye.org/
+├── api/                    # Serverless API routes
+│   ├── index.ts           # Main API entry
+│   ├── ai.ts              # AI chat endpoint
+│   └── telegram.ts        # Telegram bot webhook
+├── src/                   # Frontend source
+│   ├── components/        # React components
+│   ├── pages/            # Page components
+│   └── services/         # API services
+├── dist/                  # Build output
+├── vercel.json           # Vercel configuration
+├── package.json          # Dependencies
+└── .env.example          # Environment template
+```
+
+## 🤖 AI Integration
+
+The project uses NVIDIA's GLM-5.2 model for AI-powered features:
+
+- Content generation
+- Translation
+- Summarization
+- Chat assistance
+
+## 📱 Telegram Bot
+
+Admin bot for notifications and control:
+
+- `/status` - Check website status
+- `/stats` - View statistics
+- `/help` - Show help
+
+## 🔒 Security
+
+- JWT authentication
+- Helmet.js security headers
+- Rate limiting
+- CORS protection
+- Environment variable isolation
+
+## 📝 License
+
+MIT License - see LICENSE file
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Open Pull Request
+
+## 📧 Support
+
+For support, email support@ph-ye.org or join our Telegram channel.
+
 ---
 
-## ⚙️ البنية التقنية الأساسية (Technical Stack)
-* **الواجهة الأمامية**: مكتبة **React 19** مبنية على مصمم البناء الفائق **Vite** مدمجاً معه مكتبة **Tailwind CSS v4** للتنسيق البصري الفخم والحديث المتوافق تماماً مع الواجهات ثنائية الاتجاه (Arabic RTL / English LTR).
-* **إدارة الحركات**: مكتبة **Framer Motion** لإضافة انتقالات ناعمة تعكس الروح الصحفية الرصينة ومؤشرات الرصد النشطة.
-* **البنية الخلفية**: بيئة تشغيل خادم **Node.js** مدمج به حزمة **Express** و مفسر التشغيل الذكي **tsx** لتشغيل ملفات TypeScript مباشرة في بيئة التطوير والإنتاج.
-* **قاعدة البيانات الهجينة**:
-  - **مرحلة العمل المحلي والتطوير**: قاعدة بيانات **SQLite** محلية تدعم العمل الفوري دون إعدادات معقدة وبسرعة استجابة هائلة، مضافاً إليها محرك أتمتة المهاجرات داخل `src/db.ts`.
-  - **مرحلة الإنتاج السحابي**: توافق تام 100% مع مجمعات قواعد بيانات **PostgreSQL** و **MySQL** عبر طبقة توجيه مرنة تكتشف تلقائياً توفر `POSTGRES_URL` في متغيرات البيئة.
-* **الوكيل الذكي Hermes**: دمج كامل لنموذج **Google Gemini SDK (@google/genai)** لإعداد وتوليد وتحرير المحتوى الصحفي آلياً، واقتراح التحسينات الحقوقية والـ SEO فورياً.
-
----
-
-## 🛠️ أولاً: التثبيت والتشغيل المحلي للتطوير (Local Setup)
-
-1. **تشغيل سكربت التهيئة التلقائي**:
-   يقوم هذا السكربت بفحص المتطلبات وتثبيت الاعتماديات وإنشاء ملف قاعدة بيانات SQLite وتوليد ملف متغيرات البيئة `.env` فورياً:
-   ```bash
-   chmod +x setup.sh
-   ./setup.sh
-   ```
-
-2. **بدء تشغيل خادم التطوير**:
-   ```bash
-   npm run dev
-   ```
-   *سيتم تشغيل واجهة النشر والتطوير الفورية على الرابط الافتراضي الداخلي.*
-
----
-
-## ☁️ ثانياً: النشر السحابي (Cloud Deployment Guides)
-
-### 1. النشر على Vercel (Serverless Cloud Run)
-تم تجهيز بنية المنصة للتكامل التلقائي مع شبكة توزيع **Vercel**:
-* يتم التعرف على ملف `vercel.json` تلقائياً لتوجيه المسارات وخدمات الـ API.
-* **خطوات النشر**:
-  1. قم بربط مستودع المشروع بحسابك في [Vercel](https://vercel.com).
-  2. عيّن متغيرات البيئة التالية في صفحة المشروع بـ Vercel:
-     - `NODE_ENV=production`
-     - `JWT_SECRET=اكتب_مفتاح_JWT_عشوائي_وقوي`
-     - `POSTGRES_URL=رابط_قاعدة_بيانات_Postgres_مثل_Supabase`
-     - `GEMINI_API_KEY=مفتاح_جوجل_Gemini_الخاص_بك`
-  3. انقر على **Deploy** وسيتم البناء والنشر الفوري.
-
-### 2. النشر على Railway (Persistent Docker Containers)
-منصة Railway هي الخيار الأفضل لتشغيل كامل ميزات النظام (الخادم والوسائط المحلية وقاعدة البيانات) في حاوية تشغيل مستمرة:
-* **خطوات النشر**:
-  1. أنشئ مشروعاً جديداً في [Railway](https://railway.app).
-  2. اختر **Deploy from GitHub repo** واربط المستودع.
-  3. أضف خدمة قاعدة بيانات **PostgreSQL** المدمجة بـ Railway بضغطة واحدة. سيقوم Railway بتوليد متغير `DATABASE_URL` تلقائياً والذي يتوافق مع النظام.
-  4. عيّن بقية متغيرات البيئة المطلوبة (`JWT_SECRET`, `GEMINI_API_KEY`) في تبويب **Variables**.
-  5. ستبدأ المنصة بالبناء والتشغيل التلقائي بمجرد حفظ الإعدادات.
-
----
-
-## 🔒 المزايا الأمنية وعزل بوابات الإدارة
-1. **منع هجمات الاختراق**: تُستخدم استعلامات Parameterized الاستثنائية لمنع هجمات حقن قواعد البيانات SQL Injection.
-2. **عزل بوابات المسؤولين (Admin Security Boundary)**: يتم توليد بوابات الدخول للمشرفين والمسؤولين بموجب متغيرات بيئة مشفرة ومجهولة لمنع هجمات الاستكشاف والتخمين:
-   - مسار المشرفين المخصص: يحدده المتغير `VITE_ADMIN_PATH` (الافتراضي: `/admin`).
-   - مسار المشرف الفائق: يحدده المتغير `VITE_ROOT_PATH` (الافتراضي: `/root`).
-3. **مفاتيح API المؤمنة**: تتيح بوابة المطورين للمشرفين توليد وإبطال مفاتيح Bearer Tokens للعملاء والجهات الشريكة للوصول الحصري والآمن للمعلومات المنشورة.
-
----
-
-*تطوير وصيانة: فريق التحول الرقمي والأمن السحابي - بيت الصحافة اليمني 2026م.*
+Built with ❤️ by PressHouse Team
