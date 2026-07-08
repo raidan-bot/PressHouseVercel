@@ -7,17 +7,14 @@ const API_URL = import.meta.env?.VITE_API_URL || process.env.VITE_API_URL || '';
 
 export const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor to add JWT token and start timer
+// Interceptor to start performance timer
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
   // @ts-ignore
   config.metadata = { startTime: performance.now() };
   return config;
@@ -41,7 +38,6 @@ api.interceptors.response.use(
 
     if (status === 401 || status === 403) {
       toast.error('جلسة العمل انتهت، يرجى تسجيل الدخول مجدداً');
-      localStorage.removeItem('token');
       if (window.location.pathname.startsWith('/admin')) {
         window.location.href = '/admin/login';
       } else {

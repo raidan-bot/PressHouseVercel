@@ -26,7 +26,7 @@ import ObservatoryManager from '../admin/ObservatoryManager';
 export default function StaffDashboard() {
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
-  const { userData, logout } = useAuth();
+  const { userData, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -84,7 +84,7 @@ export default function StaffDashboard() {
           </div>
 
           <button 
-            onClick={() => { logout(); navigate('/'); }}
+            onClick={() => { signOut(); navigate('/'); }}
             className="p-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 transition-all border border-rose-900/30 cursor-pointer ml-2 rtl:ml-0 rtl:mr-2"
             title={isRtl ? 'تسجيل الخروج' : 'Logout'}
           >

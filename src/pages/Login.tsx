@@ -23,7 +23,7 @@ export default function Login() {
     setError(null);
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      updateUserContext(response.data.token, response.data.user);
+      updateUserContext(response.data.user);
       navigate('/');
     } catch (err: any) {
       console.error(err);

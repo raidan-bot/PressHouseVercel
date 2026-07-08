@@ -23,7 +23,7 @@ export default function Register() {
     setError(null);
     try {
       const response = await api.post('/api/auth/register', { email, password, name });
-      updateUserContext(response.data.token, response.data.user);
+      updateUserContext(response.data.user);
       navigate('/');
     } catch (err: any) {
       console.error(err);

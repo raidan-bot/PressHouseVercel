@@ -11,7 +11,7 @@ interface AdminHeaderProps {
 
 function AdminHeader({ isRtl, onLanguageChange }: AdminHeaderProps) {
   const { t } = useTranslation();
-  const { userData, logout } = useAuth();
+  const { userData, signOut } = useAuth();
 
   return (
     <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between shadow-lg sticky top-0 z-50">
@@ -44,7 +44,7 @@ function AdminHeader({ isRtl, onLanguageChange }: AdminHeaderProps) {
         </div>
 
         <button
-          onClick={logout}
+          onClick={signOut}
           className="p-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 transition-all border border-rose-900/30 cursor-pointer ml-2 rtl:ml-0 rtl:mr-2"
           title={isRtl ? 'تسجيل الخروج' : 'Logout'}
         >

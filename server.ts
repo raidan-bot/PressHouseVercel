@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import multer from 'multer';
@@ -1216,9 +1217,10 @@ process.once('SIGTERM', () => {
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' }, contentSecurityPolicy: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { message: 'Too many requests, please try again later.' } });
 const uploadLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 30, message: { message: 'Too many uploads, please try again later.' } });
@@ -1613,6 +1615,13 @@ app.post('/api/auth/google', authLimiter, async (req, res) => {
     }
     
     const token = jwt.sign({ uid: user.uid, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/'
+    });
     res.json({ token, user });
   } catch (err: any) {
     console.error('Core Google Auth error:', err);
@@ -2410,6 +2419,12 @@ app.post('/api/auth/register', authLimiter, async (req, res) => {
       [uid, email, hashedPassword, 'member']
     );
     const token = jwt.sign({ uid, role: 'member' }, getJwtSecret(), { expiresIn: '7d' });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
     res.status(201).json({ token, user: { uid, email, role: 'member', name: { ar: name, en: name } } });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -2425,8 +2440,16 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
     const token = jwt.sign({ uid: user.uid, role: user.role }, getJwtSecret(), { expiresIn: '7d' });
+    // Set httpOnly cookie (secure in production)
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
     // Remove password hash from response
     const { password_hash, ...userProfile } = user;
+    // Return token in body for backward compatibility during transition
     res.json({ token, user: userProfile });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
@@ -2435,8 +2458,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
 // Middleware to protect routes
 function authenticateToken(req: any, res: any, next: any) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  // Prefer httpOnly cookie, fall back to Authorization header for transition
+  let token = req.cookies?.token;
+  if (!token) {
+    const authHeader = req.headers['authorization'];
+    token = authHeader && authHeader.split(' ')[1];
+  }
   if (!token) return res.sendStatus(401);
   jwt.verify(token, getJwtSecret(), (err: any, user: any) => {
     if (err) return res.sendStatus(403);
@@ -2455,6 +2482,16 @@ app.get('/api/auth/profile', authenticateToken, async (req: any, res: any) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
   }
+});
+
+// Logout endpoint — clears the httpOnly cookie
+app.post('/api/auth/logout', (req: any, res: any) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+  });
+  res.json({ message: 'Logged out successfully' });
 });
 
 app.post('/api/ai/admin-chat', authenticateToken, async (req: any, res: any) => {

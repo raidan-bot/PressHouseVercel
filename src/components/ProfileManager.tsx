@@ -30,7 +30,7 @@ export default function ProfileManager() {
       const res = await api.put('/api/users/profile', { name, email });
       // Update local context
       if (res.data && res.data.user) {
-         updateUserContext(localStorage.getItem('token') || '', res.data.user);
+         updateUserContext(res.data.user);
       }
       setStatus({
         type: 'success',
