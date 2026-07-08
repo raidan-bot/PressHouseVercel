@@ -204,10 +204,6 @@ export default function Home() {
       default: return null;
     }
   };
-    title: { ar: 'برامجنا الرئيسية لتمكين الإعلام', en: 'Our Main Programs to Empower Media' },
-    text: { ar: 'نقدم حزمة متكاملة من الخدمات التي تضمن سلامة الصحفي واستمرارية عمله المهني بحرية واستقلالية.', en: 'We provide an integrated package of services that ensure the safety of the journalist and the continuity of their professional work freely and independently.' }
-  };
-
   React.useEffect(() => {
     const fetchProjects = async () => {
       try {
