@@ -33,7 +33,7 @@ export const PressAgentChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/v1/chat/completions', {
+      const response = await fetch('/api/press-agent/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages: newMessages }),
@@ -42,8 +42,7 @@ export const PressAgentChat: React.FC = () => {
       if (!response.ok) throw new Error('Failed to fetch response');
       
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content || 'عذراً، لم أتمكن من الحصول على رد.';
-      setMessages([...newMessages, { role: 'assistant', content }]);
+      setMessages([...newMessages, { role: 'assistant', content: data.content }]);
     } catch (error) {
       console.error(error);
       setMessages([...newMessages, { role: 'assistant', content: 'عذراً، حدث خطأ أثناء الاتصال بالمساعد.' }]);

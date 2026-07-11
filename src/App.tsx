@@ -30,7 +30,6 @@ import VolunteerOpportunityDetail from './pages/VolunteerOpportunityDetail';
 import './i18n';
 
 import { Toaster } from 'react-hot-toast';
-import { ToastProvider } from './components/ui/Toast';
 import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -38,14 +37,6 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
-
-// Creative Features
-import TAQIDashboard from './pages/TAQIDashboard';
-import BoardYemen from './pages/BoardYemen';
-import YemenCore from './pages/YemenCore';
-import PressAgent from './pages/PressAgent';
-import NeuralEditor from './pages/NeuralEditor';
-import AutoViz from './pages/AutoViz';
 
 import { motion, AnimatePresence } from 'motion/react';
 import { HelmetProvider } from 'react-helmet-async';
@@ -79,14 +70,6 @@ function AnimatedRoutes() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/access-denied" element={<AccessDenied />} />
-
-          {/* Creative Features */}
-          <Route path="/taqi" element={<TAQIDashboard />} />
-          <Route path="/board-yemen" element={<BoardYemen />} />
-          <Route path="/yemen-core" element={<YemenCore />} />
-          <Route path="/press-agent" element={<PressAgent />} />
-          <Route path="/neural-editor" element={<NeuralEditor />} />
-          <Route path="/auto-viz" element={<AutoViz />} />
 
           {/* ... Rest of routes below ... */}
           <Route path="/live" element={<Live />} />
@@ -138,9 +121,8 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <HelmetProvider>
-      <ToastProvider>
-        <Toaster position="top-right" />
-        <AuthProvider>
+      <Toaster position="top-right" />
+      <AuthProvider>
         <Router>
           <Layout>
             <AnimatedRoutes />
@@ -148,7 +130,6 @@ export default function App() {
           <PressAgentChat />
         </Router>
       </AuthProvider>
-      </ToastProvider>
     </HelmetProvider>
   );
 }

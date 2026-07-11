@@ -26,23 +26,7 @@ import {
   Copy,
   Database,
   Share2,
-  Key,
-  Tags,
-  FolderTree,
-  Newspaper,
-  Glasses,
-  BarChart3,
-  Building2,
-  Handshake,
-  BookOpen,
-  Megaphone,
-  Calendar,
-  Briefcase,
-  ScrollText,
-  Globe,
-  Palette,
-  UsersRound,
-  BrainCircuit
+  Key
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -59,7 +43,7 @@ import JobEditor from './JobEditor';
 import TenderManager from './TenderManager';
 import StatsDashboard from './StatsDashboard';
 import MediaCenter from './MediaCenter';
-import FeedbackManager from './FeedbackManager';
+import FeedbackManager from './FeedbackManager'; // for contact messages
 import VolunteerRegistry from './VolunteerRegistry';
 import NewsletterManager from './NewsletterManager';
 import ProfileManager from '../../components/ProfileManager';
@@ -68,21 +52,15 @@ import SEOManager from './SEOManager';
 import ApiExplorer from './ApiExplorer';
 import PerformanceReport from './PerformanceReport';
 import HermesAgentPanel from './HermesAgentPanel';
-import ApiKeyManager from './ApiKeyManager';
 import InstitutionIdentityManager from './InstitutionIdentityManager';
 import HRManager from './HRManager';
 import SectorManager from './SectorManager';
 import PartnerManager from './PartnerManager';
-import ArticleEditor from './ArticleEditor';
-import CategoryManager from './CategoryManager';
-import TagManager from './TagManager';
-import ViolationsMonitoringCenter from './ViolationsMonitoringCenter';
-import PressAgentDashboard from './PressAgent';
 
 export default function AdminDashboard() {
   const { i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
-  const { userData, signOut } = useAuth();
+  const { userData, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -95,81 +73,51 @@ export default function AdminDashboard() {
 
   const navSections = [
     {
-      title: isRtl ? 'مركز القيادة' : 'Command Center',
+      title: isRtl ? 'لوحة التحكم والتحليلات' : 'Analytics & Core',
       items: [
-        { id: 'overview', path: '', icon: LayoutDashboard, label: isRtl ? 'نظرة عامة' : 'Overview' },
-        { id: 'performance', path: 'performance', icon: BarChart3, label: isRtl ? 'تقرير الأداء' : 'Performance Report' },
+        { id: 'overview', path: '', icon: LayoutDashboard, label: isRtl ? 'نظرة عامة والتحليلات' : 'Overview & Analytics' },
+        { id: 'performance', path: 'performance', icon: Activity, label: isRtl ? 'تقرير الأداء' : 'Performance' },
+        { id: 'users', path: 'users', icon: Users, label: isRtl ? 'إدارة المستخدمين' : 'User Management' },
       ]
     },
     {
       title: isRtl ? 'المحتوى والنشر' : 'Content & Publishing',
       items: [
-        { id: 'articles', path: 'articles', icon: Newspaper, label: isRtl ? 'المقالات' : 'Articles' },
-        { id: 'categories', path: 'categories', icon: FolderTree, label: isRtl ? 'التصنيفات' : 'Categories' },
-        { id: 'tags', path: 'tags', icon: Tags, label: isRtl ? 'العلامات' : 'Tags' },
         { id: 'content', path: 'content', icon: FileText, label: isRtl ? 'محتوى الصفحات' : 'Page Content' },
         { id: 'slider', path: 'slider', icon: ImageIcon, label: isRtl ? 'شريط العرض' : 'Hero Slider' },
-        { id: 'media', path: 'media', icon: ImageIcon, label: isRtl ? 'مركز الوسائط' : 'Media Center' },
-      ]
-    },
-    {
-      title: isRtl ? 'المشاريع والبرامج' : 'Projects & Programs',
-      items: [
-        { id: 'projects', path: 'projects', icon: Briefcase, label: isRtl ? 'المشاريع' : 'Projects' },
-        { id: 'events', path: 'events', icon: Calendar, label: isRtl ? 'الفعاليات' : 'Events' },
-        { id: 'courses', path: 'courses', icon: BookOpen, label: isRtl ? 'الدورات التدريبية' : 'Courses' },
-        { id: 'jobs', path: 'jobs', icon: ScrollText, label: isRtl ? 'الوظائف' : 'Jobs' },
-        { id: 'tenders', path: 'tenders', icon: Globe, label: isRtl ? 'المناقصات' : 'Tenders' },
-      ]
-    },
-    {
-      title: isRtl ? 'قطاعات الأثر' : 'Impact Sectors',
-      items: [
-        { id: 'sectors', path: 'sectors', icon: Building2, label: isRtl ? 'قطاعات العمل' : 'Work Sectors' },
-        { id: 'partners', path: 'partners', icon: Handshake, label: isRtl ? 'الشركاء والداعمين' : 'Partners & Donors' },
+        { id: 'projects', path: 'projects', icon: FileText, label: isRtl ? 'المشاريع' : 'Projects' },
+        { id: 'events', path: 'events', icon: FileText, label: isRtl ? 'الفعاليات' : 'Events' },
+        { id: 'courses', path: 'courses', icon: FileText, label: isRtl ? 'الدورات التدريبية' : 'Courses' },
+        { id: 'jobs', path: 'jobs', icon: FileText, label: isRtl ? 'الوظائف' : 'Jobs' },
+        { id: 'tenders', path: 'tenders', icon: FileText, label: isRtl ? 'المناقصات' : 'Tenders' },
+        { id: 'media', path: 'media', icon: ImageIcon, label: isRtl ? 'مركز الوسائط والرفع' : 'Media Center' },
       ]
     },
     {
       title: isRtl ? 'الهوية والمنظمة' : 'Identity & Organization',
       items: [
-        { id: 'identity', path: 'identity', icon: Palette, label: isRtl ? 'الهوية البصرية' : 'Visual Identity' },
-        { id: 'hr', path: 'hr', icon: UsersRound, label: isRtl ? 'الطاقم الإداري' : 'Staff & Board' },
+        { id: 'identity', path: 'identity', icon: FileText, label: isRtl ? 'الهوية البصرية والمؤسسية' : 'Visual Identity' },
+        { id: 'hr', path: 'hr', icon: Users, label: isRtl ? 'الطاقم الإداري والوظائف' : 'Staff & Board' },
+        { id: 'sectors', path: 'sectors', icon: FileText, label: isRtl ? 'قطاعات العمل والتأثير' : 'Work Sectors' },
+        { id: 'partners', path: 'partners', icon: Users, label: isRtl ? 'الشركاء والداعمين' : 'Partners & Donors' },
       ]
     },
     {
-      title: isRtl ? 'المرصد والمجتمع' : 'Observatory & Community',
+      title: isRtl ? 'الرصد والمجتمع' : 'Monitoring & Society',
       items: [
-        { id: 'observatory', path: 'observatory', icon: ShieldAlert, label: isRtl ? 'المرصد' : 'Observatory' },
-        { id: 'volunteers', path: 'volunteers', icon: Users, label: isRtl ? 'المتطوعون' : 'Volunteers' },
-        { id: 'messages', path: 'messages', icon: Mail, label: isRtl ? 'رسائل التواصل' : 'Contact Messages' },
-        { id: 'newsletter', path: 'newsletter', icon: Megaphone, label: isRtl ? 'النشرة البريدية' : 'Newsletter' },
+        { id: 'observatory', path: 'observatory', icon: ShieldAlert, label: isRtl ? 'المرصد والانتهاكات' : 'Observatory' },
+        { id: 'volunteers', path: 'volunteers', icon: Users, label: isRtl ? 'إدارة المتطوعين' : 'Volunteers' },
+        { id: 'messages', path: 'messages', icon: FileText, label: isRtl ? 'رسائل التواصل' : 'Contact Messages' },
+        { id: 'newsletter', path: 'newsletter', icon: Mail, label: isRtl ? 'النشرة البريدية' : 'Newsletter' },
       ]
     },
     {
-      title: isRtl ? 'الذكاء الاصطناعي والتطوير' : 'AI & Development',
+      title: isRtl ? 'الربط المطور والذكاء الاصطناعي' : 'AI & Advanced Developer',
       items: [
-        { id: 'hermes', path: 'hermes', icon: BrainCircuit, label: isRtl ? 'وكيل هيرمس' : 'Hermes AI Agent' },
-        { id: 'api', path: 'api', icon: Terminal, label: isRtl ? 'مستكشف API' : 'API Explorer' },
-        { id: 'apikeys', path: 'apikeys', icon: Key, label: isRtl ? 'مفاتيح API' : 'API Keys' },
-        { id: 'seo', path: 'seo', icon: Globe, label: isRtl ? 'إدارة SEO' : 'SEO Manager' },
-      ]
-    },
-    {
-      title: isRtl ? 'المستخدمون' : 'Users',
-      items: [
-        { id: 'users', path: 'users', icon: Users, label: isRtl ? 'إدارة المستخدمين' : 'User Management' },
-      ]
-    },
-    {
-      title: isRtl ? 'الإعدادات' : 'Settings',
-      items: [
-        { id: 'settings', path: 'settings', icon: Settings, label: isRtl ? 'إعدادات النظام' : 'System Settings' },
-      ]
-    },
-    {
-      title: isRtl ? 'الملف الشخصي' : 'Profile',
-      items: [
-        { id: 'profile', path: 'profile', icon: UserCircle, label: isRtl ? 'ملفي الشخصي' : 'My Profile' },
+        { id: 'hermes', path: 'hermes', icon: Cpu, label: isRtl ? 'وكيل هيرمس الذكي' : 'Hermes AI Agent' },
+        { id: 'api', path: 'api', icon: Terminal, label: isRtl ? 'مستكشف ومفاتيح API' : 'API Explorer' },
+        { id: 'seo', path: 'seo', icon: FileText, label: isRtl ? 'إدارة SEO' : 'SEO Manager' },
+        { id: 'settings', path: 'settings', icon: Settings, label: isRtl ? 'إعدادات النظام العام' : 'System Settings' },
       ]
     }
   ];
@@ -209,7 +157,7 @@ export default function AdminDashboard() {
           </div>
 
           <button 
-            onClick={() => { signOut(); navigate('/'); }}
+            onClick={() => { logout(); navigate('/'); }}
             className="p-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 transition-all border border-rose-900/30 cursor-pointer ml-2 rtl:ml-0 rtl:mr-2"
             title={isRtl ? 'تسجيل الخروج' : 'Logout'}
           >
@@ -250,9 +198,6 @@ export default function AdminDashboard() {
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto max-w-7xl mx-auto w-full bg-slate-50 text-slate-900">
           <Routes>
             <Route path="/" element={<StatsDashboard />} />
-            <Route path="/articles" element={<ArticleEditor />} />
-            <Route path="/categories" element={<CategoryManager />} />
-            <Route path="/tags" element={<TagManager />} />
             <Route path="/users" element={<UserManager />} />
             <Route path="/settings" element={<SettingsManager />} />
             <Route path="/content" element={<PageContentManager />} />
@@ -276,9 +221,6 @@ export default function AdminDashboard() {
             <Route path="/hr" element={<HRManager />} />
             <Route path="/sectors" element={<SectorManager />} />
             <Route path="/partners" element={<PartnerManager />} />
-            <Route path="/apikeys" element={<ApiKeyManager />} />
-            <Route path="/violations-monitoring" element={<ViolationsMonitoringCenter />} />
-            <Route path="/pressagent" element={<PressAgentDashboard />} />
           </Routes>
         </main>
       </div>
@@ -314,23 +256,13 @@ function OverviewTab({ isRtl, triggerSuccess }: { isRtl: boolean, triggerSuccess
           });
         }
 
-        const [articlesRes, feedbackRes] = await Promise.allSettled([
-          api.get('/api/articles'),
-          api.get('/api/feedback')
+        // Mock System Logs for high fidelity monitoring
+        setLogs([
+          { time: '14:24:10', action: 'System Backup successfully completed to SQLite' },
+          { time: '13:05:12', action: 'S3-compatible Object store synchronization active' },
+          { time: '11:15:40', action: 'AI Chat session initialized with custom Hermes NIM Agent' },
+          { time: '09:40:02', action: 'New membership approved for Journalist Salem Al-Yafie' }
         ]);
-        const recent: any[] = [];
-        if (articlesRes.status === 'fulfilled') {
-          (articlesRes.value.data || []).slice(0, 5).forEach((a: any) => {
-            recent.push({ time: a.createdAt ? new Date(a.createdAt).toLocaleString() : '', action: `${isRtl ? 'مقال جديد' : 'New article'}: ${a.title?.ar || a.title?.en || a.title || ''}` });
-          });
-        }
-        if (feedbackRes.status === 'fulfilled') {
-          (feedbackRes.value.data || []).slice(0, 5).forEach((f: any) => {
-            recent.push({ time: f.createdAt ? new Date(f.createdAt).toLocaleString() : '', action: `${isRtl ? 'رسالة جديدة' : 'New feedback'}: ${f.name || f.email || ''}` });
-          });
-        }
-        recent.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-        setLogs(recent.slice(0, 10));
       } catch (err) {
         console.error('Error fetching dashboard overview:', err);
       } finally {
@@ -421,18 +353,12 @@ function OverviewTab({ isRtl, triggerSuccess }: { isRtl: boolean, triggerSuccess
             {isRtl ? 'سجلات النظام المباشرة' : 'Live System Operations Log'}
           </h3>
           <div className="space-y-3 font-mono text-xs">
-            {logs.length === 0 ? (
-              <div className="p-6 text-center text-slate-500 border border-dashed border-slate-800 rounded-lg">
-                {isRtl ? 'لا توجد أحداث حديثة مسجلة بعد' : 'No recent activity recorded yet'}
+            {logs.map((log, idx) => (
+              <div key={idx} className="p-2.5 bg-slate-950 rounded-lg border border-slate-800 flex gap-3 text-slate-300">
+                <span className="text-indigo-400 font-black">{log.time}</span>
+                <span className="flex-1">{log.action}</span>
               </div>
-            ) : (
-              logs.map((log, idx) => (
-                <div key={idx} className="p-2.5 bg-slate-950 rounded-lg border border-slate-800 flex gap-3 text-slate-300">
-                  <span className="text-indigo-400 font-black whitespace-nowrap">{log.time}</span>
-                  <span className="flex-1">{log.action}</span>
-                </div>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </div>

@@ -11,20 +11,6 @@ import autoTable from 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 import { supabase } from '../lib/db';
 import { SEO } from '../components/common/SEO';
-import { cn } from '../lib/utils';
-
-// UI Components
-import {
-  Button,
-  Badge,
-  StatusBadge,
-  Card,
-  CardBody,
-  EmptyState as UIEmptyState,
-  ScrollReveal,
-  StaggerContainer,
-  StaggerItem,
-} from '../components/ui';
 
 export default function Violations() {
   const { t, i18n } = useTranslation();
@@ -311,26 +297,21 @@ export default function Violations() {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
-              <Button
-                variant="danger"
-                size="lg"
+              <button 
                 onClick={() => setActiveTab('report')}
-                className="!rounded-2xl shadow-[0_0_40px_-10px_rgba(220,38,38,0.5)]"
+                className="bg-red-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-red-700 transition-all flex items-center justify-center gap-3 shadow-[0_0_40px_-10px_rgba(220,38,38,0.5)]"
               >
                 <AlertTriangle size={20} />
                 {t('violations.report')}
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
+              </button>
+              <button 
                 onClick={handleDownloadReport}
                 disabled={isGeneratingReport}
-                loading={isGeneratingReport}
-                className="!bg-white/5 !backdrop-blur-md !text-white !border-white/10 hover:!bg-white/10 !rounded-2xl"
+                className="bg-white/5 backdrop-blur-md text-white border border-white/10 px-8 py-4 rounded-2xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
               >
                 {isGeneratingReport ? <Loader2 size={20} className="animate-spin" /> : <Download size={20} />}
                 {isGeneratingReport ? (isRtl ? 'جاري التحميل...' : 'Generating...') : (isRtl ? 'تصدير البيانات' : 'Export Data')}
-              </Button>
+              </button>
             </div>
           </div>
 
@@ -370,8 +351,7 @@ export default function Violations() {
               className="space-y-8"
             >
               {/* Interactive Data Filters */}
-              <Card variant="default" className="rounded-3xl p-6">
-                <div className="flex flex-col lg:flex-row gap-4 items-center w-full">
+              <div className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 flex flex-col lg:flex-row gap-4 items-center">
                 {/* Search */}
                 <div className="relative flex-1 w-full">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -425,17 +405,15 @@ export default function Violations() {
                     <option value="custom">{isRtl ? 'تاريخ مخصص' : 'Custom Dates'}</option>
                   </select>
                 </div>
-                </div>
-              </Card>
+              </div>
 
               {/* Custom Date Range Pickers */}
               {dateRangeFilter === 'custom' && (
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
+                  className="bg-white border border-slate-200 shadow-sm rounded-3xl p-6 flex flex-col md:flex-row gap-4 items-end"
                 >
-                  <Card variant="default" className="rounded-3xl p-6">
-                    <div className="flex flex-col md:flex-row gap-4 items-end">
                   <div className="flex-1">
                     <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">{isRtl ? 'من تاريخ' : 'Start Date'}</label>
                     <input 
@@ -454,8 +432,6 @@ export default function Violations() {
                       className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-blue-500"
                     />
                   </div>
-                  </div>
-                  </Card>
                 </motion.div>
               )}
 
@@ -463,21 +439,21 @@ export default function Violations() {
               <div id="dashboard-charts" className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 
                 {/* Big Stat Card */}
-                <Card 
-                  variant="default"
-                  className="md:col-span-12 lg:col-span-4 rounded-[32px] p-8 relative overflow-hidden group"
-                  as="motion"
-                  motionProps={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5 } }}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="md:col-span-12 lg:col-span-4 bg-white border border-slate-200 shadow-sm rounded-[32px] p-8 relative overflow-hidden group"
                 >
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700 text-slate-900">
                     <ShieldAlert size={150} />
                   </div>
-                  <CardBody className="relative z-10 h-full flex flex-col justify-between p-0">
+                  <div className="relative z-10 h-full flex flex-col justify-between">
                     <div>
-                      <Badge variant="danger" size="sm" className="mb-6">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-red-50 text-red-600 text-xs font-mono uppercase tracking-widest mb-6 border border-red-100">
                         <Activity size={14} />
                         {isRtl ? 'إجمالي الحالات الموثقة' : 'Total Documented Cases'}
-                      </Badge>
+                      </div>
                       <div className="text-7xl font-black text-slate-900 tracking-tighter">
                         {violations.length}
                       </div>
@@ -491,26 +467,24 @@ export default function Violations() {
                         </div>
                       </div>
                     </div>
-                  </CardBody>
-                </Card>
+                  </div>
+                </motion.div>
 
                 {filteredViolations.length === 0 ? (
-                  <div className="md:col-span-12 lg:col-span-8">
-                    <UIEmptyState
-                      icon={<ShieldAlert size={64} />}
-                      title={isRtl ? 'لا توجد بيانات متاحة' : 'No Data Available'}
-                      description={isRtl ? 'لم يتم العثور على أي انتهاكات موثقة تطابق معايير البحث الحالية.' : 'No documented violations found matching the current search criteria.'}
-                    />
+                  <div className="md:col-span-12 lg:col-span-8 bg-white border border-slate-200 shadow-sm rounded-[32px] p-8 flex flex-col items-center justify-center text-center">
+                     <ShieldAlert size={64} className="text-slate-300 mb-4" />
+                     <h3 className="text-xl font-bold text-slate-900 mb-2">{isRtl ? 'لا توجد بيانات متاحة' : 'No Data Available'}</h3>
+                     <p className="text-slate-500 max-w-md mx-auto">{isRtl ? 'لم يتم العثور على أي انتهاكات موثقة تطابق معايير البحث الحالية.' : 'No documented violations found matching the current search criteria.'}</p>
                   </div>
                 ) : (
                   <>
                     {/* Trend Chart */}
-                    <Card 
-                      variant="default"
-                      className="md:col-span-12 lg:col-span-8 rounded-[32px] p-8"
-                      as="motion"
-                      motionProps={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay: 0.1 } }}
-                    >
+                    <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="md:col-span-12 lg:col-span-8 bg-white border border-slate-200 shadow-sm rounded-[32px] p-8"
+                >
                   <div className="flex justify-between items-center mb-8">
                     <div>
                       <h3 className="text-xl font-bold text-slate-900">{isRtl ? 'مؤشر الانتهاكات الزمني' : 'Violations Timeline'}</h3>
@@ -531,14 +505,14 @@ export default function Violations() {
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                </Card>
+                </motion.div>
 
                 {/* Types Breakdown - Progress Bars */}
-                <Card 
-                  variant="default"
-                  className="md:col-span-12 lg:col-span-12 rounded-[32px] p-8"
-                  as="motion"
-                  motionProps={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay: 0.2 } }}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="md:col-span-12 lg:col-span-12 bg-white border border-slate-200 shadow-sm rounded-[32px] p-8"
                 >
                   <h3 className="text-xl font-bold text-slate-900 mb-8">{isRtl ? 'تصنيف الانتهاكات' : 'Violations Classification'}</h3>
                   <div className="space-y-6">
@@ -566,14 +540,14 @@ export default function Violations() {
                       );
                     })}
                   </div>
-                </Card>
+                </motion.div>
 
                 {/* Geographic Distribution - Interactive Map */}
-                <Card 
-                  variant="default"
-                  className="md:col-span-12 lg:col-span-12 rounded-[32px] p-8"
-                  as="motion"
-                  motionProps={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay: 0.3 } }}
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="md:col-span-12 lg:col-span-12 bg-white border border-slate-200 shadow-sm rounded-[32px] p-8"
                 >
                   <h3 className="text-xl font-bold text-slate-900 mb-8">{isRtl ? 'التوزيع الجغرافي' : 'Geographic Distribution'}</h3>
                   <div className="w-full">
@@ -584,17 +558,17 @@ export default function Violations() {
                       onSelectGovernorate={setSelectedGovernorate}
                     />
                   </div>
-                </Card>
+                </motion.div>
                   </>
                 )}
               </div>
 
               {/* Recent Violations Table - Light Mode */}
-              <Card 
-                variant="default"
-                className="rounded-[32px] overflow-hidden mt-8"
-                as="motion"
-                motionProps={{ initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.5, delay: 0.4 } }}
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="bg-white border border-slate-200 shadow-sm rounded-[32px] overflow-hidden mt-8"
               >
                 <div className="p-8 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
                   <div>
@@ -602,19 +576,16 @@ export default function Violations() {
                     <p className="text-sm text-slate-500 mt-1">{isRtl ? 'أحدث الحالات الموثقة والمتحقق منها' : 'Latest verified and documented cases'}</p>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
-                    <Button 
-                      variant="outline" 
-                      size="md" 
-                      onClick={() => {
+                    <button onClick={() => {
                         setSearchTerm('');
                         setTypeFilter('all');
                         setSelectedGovernorate(null);
                         setDateRangeFilter('all');
-                      }}
-                      className="!bg-slate-50 !text-slate-500 hover:!text-red-600 hover:!border-red-200 !rounded-xl"
+                      }} 
+                      className="p-3 bg-slate-50 border border-slate-200 text-slate-500 rounded-xl hover:text-red-600 hover:border-red-200 transition-all font-bold text-sm px-6"
                     >
                       {isRtl ? 'مسح الفلاتر' : 'Clear Filters'}
-                    </Button>
+                    </button>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -651,12 +622,15 @@ export default function Violations() {
                             </td>
                             <td className="px-8 py-6 text-slate-500 text-sm font-mono">{v.date}</td>
                             <td className="px-8 py-6">
-                              <Badge variant="neutral" size="sm">
+                              <span className="bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1 rounded-lg text-xs font-bold">
                                 {v.type}
-                              </Badge>
+                              </span>
                             </td>
                             <td className="px-8 py-6">
-                              <StatusBadge status={v.status === 'approved' ? 'active' : v.status === 'pending' ? 'pending' : 'inactive'} size="sm" />
+                              <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold bg-emerald-50 px-3 py-1 rounded-lg w-fit border border-emerald-100">
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                {v.status}
+                              </div>
                             </td>
                             <td className="px-8 py-6 text-end">
                               <button className="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all ml-auto">
@@ -669,7 +643,7 @@ export default function Violations() {
                     </tbody>
                   </table>
                 </div>
-              </Card>
+              </motion.div>
             </motion.div>
           )}
 
@@ -679,16 +653,15 @@ export default function Violations() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="min-h-[700px] flex flex-col items-center justify-center space-y-12 relative overflow-hidden w-full"
+              className="bg-white border border-slate-200 shadow-sm p-6 md:p-10 rounded-[40px] min-h-[700px] flex flex-col items-center justify-center space-y-12 relative overflow-hidden w-full"
             >
-              <Card variant="default" className="rounded-[40px] p-6 md:p-10 w-full" as="div">
               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-5 mix-blend-overlay pointer-events-none" />
               
               <div className="text-center space-y-4 relative z-10 w-full">
-                <Badge variant="info" size="sm" className="mb-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 text-xs font-mono uppercase tracking-widest mb-2">
                   <Crosshair size={14} />
                   {isRtl ? 'تحليل مكاني' : 'Spatial Analysis'}
-                </Badge>
+                </div>
                 <h3 className="text-3xl md:text-5xl font-black text-slate-900">{isRtl ? 'خريطة الانتهاكات التفاعلية' : 'Interactive Violations Map'}</h3>
                 <p className="text-slate-500 max-w-2xl mx-auto text-sm md:text-base">{isRtl ? 'انقر على نقاط الخريطة التفاعلية لعرض الإحصائيات الفورية والانتهاكات الخاصة بكل منطقة يمنية.' : 'Click on any province pin on the interactive map to inspect immediate metrics, recent incidents and type distributions.'}</p>
               </div>
@@ -704,13 +677,12 @@ export default function Violations() {
               
               <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-3 relative z-10">
                 {Object.entries(statsByGov).map(([name, count]: any) => (
-                  <Card key={name} variant="bordered" className="flex flex-col p-4 rounded-2xl hover:!border-blue-300 hover:shadow-md transition-all group cursor-pointer" as="div" onClick={() => setSelectedGovernorate(name)}>
+                  <div key={name} className="flex flex-col p-4 bg-white rounded-2xl border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer" onClick={() => setSelectedGovernorate(name)}>
                     <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mb-1 group-hover:text-blue-600 transition-colors truncate">{name}</span>
                     <span className="text-xl font-black text-slate-900 font-mono">{count}</span>
-                  </Card>
+                  </div>
                 ))}
               </div>
-              </Card>
             </motion.div>
           )}
 
@@ -722,15 +694,19 @@ export default function Violations() {
               exit={{ opacity: 0, x: -20 }}
               className="max-w-4xl mx-auto"
             >
-              <Card variant="default" className="rounded-[40px] p-8 md:p-12">
+              <div className="bg-white border border-slate-200 shadow-sm rounded-[40px] p-8 md:p-12">
                 <ViolationForm onSuccess={() => setActiveTab('stats')} />
-              </Card>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </main>
     </div>
   );
+}
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(' ');
 }
 
 function MapPin(props: any) {

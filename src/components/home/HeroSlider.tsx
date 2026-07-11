@@ -128,45 +128,45 @@ export const HeroSlider: React.FC = () => {
     }
   };
 
-  const getAnimationProps = (type: string, delay: number = 0, customType?: string): Record<string, unknown> => {
+  const getAnimationProps = (type: string, delay: number = 0, customType?: string) => {
     const animation = customType || type;
     switch (animation) {
       case 'slide':
         return {
           initial: { opacity: 0, x: isRtl ? 100 : -100 },
           whileInView: { opacity: 1, x: 0 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
         };
       case 'slide-up':
         return {
           initial: { opacity: 0, y: 100 },
           whileInView: { opacity: 1, y: 0 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
         };
       case 'slide-down':
         return {
           initial: { opacity: 0, y: -100 },
           whileInView: { opacity: 1, y: 0 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
         };
       case 'zoom':
       case 'scale-in':
         return {
           initial: { opacity: 0, scale: 0.8 },
           whileInView: { opacity: 1, scale: 1 },
-          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] as const }
+          transition: { duration: 0.8, delay, ease: [0.22, 1, 0.36, 1] }
         };
       case 'scale-up':
         return {
           initial: { opacity: 0, scale: 1.5 },
           whileInView: { opacity: 1, scale: 1 },
-          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] as const }
+          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] }
         };
       case 'scale-down':
         return {
           initial: { opacity: 0, scale: 0.5 },
           whileInView: { opacity: 1, scale: 1 },
-          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] as const }
+          transition: { duration: 1, delay, ease: [0.22, 1, 0.36, 1] }
         };
       case 'fade':
       case 'fade-in':
@@ -259,12 +259,12 @@ export const HeroSlider: React.FC = () => {
                       {slide.description[lang]}
                     </motion.p>
 
-                    {(slide as any).type === 'violation-stats' && (slide as any).stats && (
+                    {slide.type === 'violation-stats' && (slide as any).stats && (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.95, y: 15 }}
                         whileInView={{ opacity: 1, scale: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] as const }}
+                        transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
                         className="grid grid-cols-3 gap-4 max-w-xl w-full pt-2"
                       >
                         <div className="bg-slate-900/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex flex-col justify-between text-start hover:border-blue-500/30 transition-all">
@@ -279,6 +279,38 @@ export const HeroSlider: React.FC = () => {
                           <span className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'دقة التوثيق' : 'Verified Rate'}</span>
                           <span className="text-2xl md:text-3xl font-black text-emerald-400 font-mono mt-1">{(slide as any).stats.verifiedRate}</span>
                         </div>
+                      </motion.div>
+                    )}
+
+                    {slide.type === 'institutional-impact' && (slide as any).stats && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                        className="grid grid-cols-3 gap-4 max-w-xl w-full pt-2"
+                      >
+                        <motion.div 
+                          whileHover={{ scale: 1.05 }}
+                          className="bg-slate-900/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex flex-col justify-between text-start hover:border-blue-500/30 transition-all"
+                        >
+                          <span className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'إجمالي المستفيدين' : 'Total Beneficiaries'}</span>
+                          <span className="text-2xl md:text-3xl font-black text-emerald-400 font-mono mt-1">{(slide as any).stats.beneficiaries.toLocaleString()}+</span>
+                        </motion.div>
+                        <motion.div 
+                          whileHover={{ scale: 1.05 }}
+                          className="bg-slate-900/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex flex-col justify-between text-start hover:border-blue-500/30 transition-all"
+                        >
+                          <span className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'الصحفيين المؤهلين' : 'Trained Journalists'}</span>
+                          <span className="text-2xl md:text-3xl font-black text-amber-500 font-mono mt-1">{(slide as any).stats.graduated.toLocaleString()}+</span>
+                        </motion.div>
+                        <motion.div 
+                          whileHover={{ scale: 1.05 }}
+                          className="bg-slate-900/60 backdrop-blur-md border border-white/10 p-4 rounded-2xl flex flex-col justify-between text-start hover:border-blue-500/30 transition-all"
+                        >
+                          <span className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-wider">{isRtl ? 'الساعات التدريبية' : 'Training Hours'}</span>
+                          <span className="text-2xl md:text-3xl font-black text-blue-400 font-mono mt-1">{(slide as any).stats.hours.toLocaleString()}+</span>
+                        </motion.div>
                       </motion.div>
                     )}
 

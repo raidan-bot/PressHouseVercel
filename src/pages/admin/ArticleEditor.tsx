@@ -7,11 +7,28 @@ import RichTextEditor from '../../components/admin/RichTextEditor';
 import { Article } from '../../types';
 import { MediaLibraryModal } from '../../components/media/MediaLibraryModal';
 import { FacebookImportModal } from '../../components/admin/FacebookImportModal';
-import { translateText, generateSeoMetadata } from '../../services/AIService';
+import { translateText, generateSeoMetadata, generateSliderSummary } from '../../services/AIService';
 import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { ImagePicker } from '../../components/admin/ImagePicker';
 import { SmartTranslate } from '../../components/admin/SmartTranslate';
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    [{ 'font': [] }],
+    ['bold', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'script': 'sub' }, { 'script': 'super' }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+    [{ 'indent': '-1' }, { 'indent': '+1' }],
+    [{ 'direction': 'rtl' }],
+    [{ 'align': [] }],
+    ['link', 'image', 'video', 'blockquote', 'code-block'],
+    ['clean']
+  ],
+};
+
 export default function ArticleEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -86,7 +103,6 @@ export default function ArticleEditor() {
     show_in_slider: false,
     slider_caption: { ar: '', en: '' },
     slider_button_text: { ar: '', en: '' },
-    slider_button_link: '',
     slider_image: '',
     seo: {
       title: { ar: '', en: '' },
@@ -117,7 +133,6 @@ export default function ArticleEditor() {
               show_in_slider: data.show_in_slider === 1 || data.show_in_slider === true,
               slider_caption: typeof data.slider_caption === 'string' ? JSON.parse(data.slider_caption) : (data.slider_caption || {ar: '', en: ''}),
               slider_button_text: typeof data.slider_button_text === 'string' ? JSON.parse(data.slider_button_text) : (data.slider_button_text || {ar: '', en: ''}),
-              slider_button_link: data.slider_button_link || '',
               seo: typeof data.seo === 'string' ? JSON.parse(data.seo) : data.seo
             } as Article);
           }
@@ -129,23 +144,41 @@ export default function ArticleEditor() {
     }
   }, [id]);
 
-  const handleAutoGenerateSlider = () => {
-    const titleAr = article.title?.ar || '';
-    const titleEn = article.title?.en || '';
-    setArticle({
-      ...article,
-      show_in_slider: true,
-      slider_image: article.slider_image || article.mainImage || '',
-      slider_caption: {
-        ar: article.slider_caption?.ar || titleAr,
-        en: article.slider_caption?.en || titleEn
-      },
-      slider_button_text: {
-        ar: article.slider_button_text?.ar || 'اقرأ الخبر',
-        en: article.slider_button_text?.en || 'Read News'
-      },
-      slider_button_link: article.slider_button_link || `/news/${id}`
-    });
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const handleAutoGenerateSlider = async () => {
+    setGeneratingSummary(true);
+    try {
+      const result = await generateSliderSummary(article.title, article.content);
+      const capAr = result?.caption?.ar || article.title?.ar || '';
+      const capEn = result?.caption?.en || article.title?.en || '';
+      setArticle(prev => ({
+        ...prev,
+        show_in_slider: true,
+        slider_image: prev.slider_image || prev.mainImage || '',
+        slider_caption: { ar: capAr, en: capEn },
+        slider_button_text: {
+          ar: prev.slider_button_text?.ar || 'اقرأ الخبر',
+          en: prev.slider_button_text?.en || 'Read News'
+        }
+      }));
+    } catch (e) {
+      console.error(e);
+      setArticle(prev => ({
+        ...prev,
+        show_in_slider: true,
+        slider_image: prev.slider_image || prev.mainImage || '',
+        slider_caption: {
+          ar: prev.slider_caption?.ar || prev.title?.ar || '',
+          en: prev.slider_caption?.en || prev.title?.en || ''
+        },
+        slider_button_text: {
+          ar: prev.slider_button_text?.ar || 'اقرأ الخبر',
+          en: prev.slider_button_text?.en || 'Read News'
+        }
+      }));
+    } finally {
+      setGeneratingSummary(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -318,7 +351,7 @@ export default function ArticleEditor() {
                         value={article.content?.ar || ''}
                         onChange={(content) => setArticle({ ...article, content: { ...article.content || { ar: '', en: '' }, ar: content } })}
                         placeholder="اكتب محتوى المقال والخبر الصحفي هنا باللغة العربية..."
-                        dir="rtl"
+                        isRtl={true}
                       />
                     </div>
                   </motion.div>
@@ -346,7 +379,7 @@ export default function ArticleEditor() {
                         value={article.content?.en || ''}
                         onChange={(content) => setArticle({ ...article, content: { ...article.content || { ar: '', en: '' }, en: content } })}
                         placeholder="Write article content here in English..."
-                        dir="ltr"
+                        isRtl={false}
                       />
                     </div>
                   </motion.div>
@@ -509,15 +542,54 @@ export default function ArticleEditor() {
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-bold text-slate-700 block mb-2">{isRtl ? 'التصنيف' : 'Category'}</label>
+                <label className="text-sm font-bold text-slate-700 block mb-2">{isRtl ? 'التصنيف الرئيسي' : 'Main Category'}</label>
                 <select 
                   value={article.category}
-                  onChange={(e) => setArticle({ ...article, category: e.target.value as any })}
+                  onChange={(e) => {
+                    const cat = e.target.value as any;
+                    let sub = '';
+                    if (cat === 'news') sub = 'local_news';
+                    else if (cat === 'report') sub = 'human_rights';
+                    else if (cat === 'press_release') sub = 'advocacy_statements';
+                    setArticle({ ...article, category: cat, subcategory: sub });
+                  }}
                   className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-medium"
                 >
                   <option value="news">{isRtl ? 'أخبار' : 'News'}</option>
                   <option value="report">{isRtl ? 'تقارير' : 'Reports'}</option>
                   <option value="press_release">{isRtl ? 'بيانات صحفية' : 'Press Releases'}</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-slate-700 block mb-2">{isRtl ? 'التصنيف الفرعي' : 'Sub-category'}</label>
+                <select 
+                  value={article.subcategory || ''}
+                  onChange={(e) => setArticle({ ...article, subcategory: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none font-medium text-sm bg-slate-50"
+                >
+                  <option value="">{isRtl ? '-- حدد تصنيف فرعي --' : '-- Select Sub-category --'}</option>
+                  {article.category === 'news' && (
+                    <>
+                      <option value="local_news">{isRtl ? 'أخبار محلية' : 'Local News'}</option>
+                      <option value="international_news">{isRtl ? 'أخبار دولية' : 'International News'}</option>
+                      <option value="press_house_news">{isRtl ? 'أخبار بيت الصحافة' : 'PressHouse News'}</option>
+                    </>
+                  )}
+                  {article.category === 'report' && (
+                    <>
+                      <option value="human_rights">{isRtl ? 'حقوق الإنسان' : 'Human Rights'}</option>
+                      <option value="press_freedom">{isRtl ? 'حرية الصحافة' : 'Press Freedom'}</option>
+                      <option value="investigative_reports">{isRtl ? 'تحقيقات صحفية' : 'Investigative Reports'}</option>
+                    </>
+                  )}
+                  {article.category === 'press_release' && (
+                    <>
+                      <option value="advocacy_statements">{isRtl ? 'بيانات المناصرة' : 'Advocacy Statements'}</option>
+                      <option value="periodic_statements">{isRtl ? 'بيانات دورية' : 'Periodic Statements'}</option>
+                      <option value="urgent_appeals">{isRtl ? 'نداءات عاجلة' : 'Urgent Appeals'}</option>
+                    </>
+                  )}
                 </select>
               </div>
 
@@ -609,10 +681,15 @@ export default function ArticleEditor() {
                   <button
                     type="button"
                     onClick={handleAutoGenerateSlider}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200/50 transition-colors"
+                    disabled={generatingSummary}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200/50 transition-colors disabled:opacity-50"
                     title={isRtl ? 'توليد ملخص وتنشيط السلايدر تلقائياً بنقرة واحدة' : 'Auto generate slider summary with one click'}
                   >
-                    <Sparkles size={12} className="text-amber-500 fill-amber-500 animate-pulse" />
+                    {generatingSummary ? (
+                      <Loader2 size={12} className="animate-spin text-blue-600" />
+                    ) : (
+                      <Sparkles size={12} className="text-amber-500 fill-amber-500 animate-pulse" />
+                    )}
                     {isRtl ? 'توليد ملخص للسلايدر' : 'Generate Slider Summary'}
                   </button>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -675,26 +752,6 @@ export default function ArticleEditor() {
                         className="w-1/2 p-2.5 rounded-lg border border-slate-200 text-xs"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{isRtl ? 'رابط الزر' : 'Button Link'}</label>
-                    <input 
-                      type="text"
-                      placeholder="/news/123 or full URL"
-                      value={article.slider_button_link}
-                      onChange={(e) => setArticle({...article, slider_button_link: e.target.value})}
-                      className="w-full p-2.5 rounded-lg border border-slate-200 text-xs"
-                    />
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    <a 
-                      href={`/api/slider-preview/article/${id || 'new'}`} 
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-1 text-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-100"
-                    >
-                      {isRtl ? 'معاينة شريط العرض' : 'Preview in Slider'}
-                    </a>
                   </div>
                 </motion.div>
               )}

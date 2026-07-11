@@ -28,8 +28,13 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Link: <LinkIcon size={22} />
 };
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, type MotionValue } from 'motion/react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { useAuth } from '../context/AuthContext';
-import { cn } from '../lib/utils';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 interface NavItemProps {
   mouseX: MotionValue<number>;

@@ -2,7 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
-import { cn } from '../../lib/utils';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 interface ProjectCardProps {
   project: {

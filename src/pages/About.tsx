@@ -7,8 +7,13 @@ import {
   MessageSquare, Rocket, Shield, PenTool, 
   TrendingUp, Search, CheckCircle2, Globe
 } from 'lucide-react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { SEO } from '../components/common/SEO';
-import { cn } from '../lib/utils';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function About() {
   const { i18n } = useTranslation();

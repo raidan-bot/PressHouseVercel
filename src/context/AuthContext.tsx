@@ -7,7 +7,7 @@ interface AuthContextType {
   userData: User | null;
   loading: boolean;
   signOut: () => Promise<void>;
-  updateUserContext: (user: User) => void;
+  updateUserContext: (token: string, user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,28 +19,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      try {
-        const profileResponse = await api.get('/api/auth/profile');
-        const apiUser = profileResponse.data;
-        setUserData(apiUser);
-        setUser({
-          uid: apiUser.uid,
-          email: apiUser.email,
-          displayName: apiUser.displayName || apiUser.email.split('@')[0],
-        });
-      } catch (error) {
-        console.error('Error fetching API profile:', error);
-        setUser(null);
-        setUserData(null);
-      } finally {
-        setLoading(false);
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const profileResponse = await api.get('/api/auth/profile');
+          const apiUser = profileResponse.data;
+          setUserData(apiUser);
+          setUser({
+            uid: apiUser.uid,
+            email: apiUser.email,
+            displayName: apiUser.displayName || apiUser.email.split('@')[0],
+          });
+          setLoading(false);
+          return;
+        } catch (error) {
+          console.error('Error fetching API profile:', error);
+          localStorage.removeItem('token');
+        }
       }
+      
+      setUser(null);
+      setUserData(null);
+      setLoading(false);
     };
 
     checkAuthStatus();
   }, []);
 
-  const updateUserContext = (user: User) => {
+  const updateUserContext = (token: string, user: User) => {
+    localStorage.setItem('token', token);
     setUserData(user);
     setUser({
       uid: user.uid,
@@ -51,11 +58,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     } catch (error) {
       console.error('Error signing out:', error);
-    } finally {
-      window.location.href = '/login';
     }
   };
 

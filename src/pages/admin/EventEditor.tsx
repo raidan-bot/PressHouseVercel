@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Loader2, Save, Trash2, Plus, Globe, Wand2, ArrowLeft, Sparkles } from 'lucide-react';
 import { api } from '../../services/api';
 import { Event } from '../../types';
+import { generateSliderSummary } from '../../services/AIService';
 
 import { SmartTranslate } from '../../components/admin/SmartTranslate';
 
@@ -19,7 +20,6 @@ export default function EventEditor() {
     show_in_slider: false,
     slider_caption: { ar: '', en: '' },
     slider_button_text: { ar: '', en: '' },
-    slider_button_link: '',
     slider_image: '',
     media: [],
     videos: []
@@ -107,7 +107,6 @@ export default function EventEditor() {
           show_in_slider: data.show_in_slider === 1 || data.show_in_slider === true,
           slider_caption: typeof data.slider_caption === 'string' ? JSON.parse(data.slider_caption) : (data.slider_caption || {ar: '', en: ''}),
           slider_button_text: typeof data.slider_button_text === 'string' ? JSON.parse(data.slider_button_text) : (data.slider_button_text || {ar: '', en: ''}),
-          slider_button_link: data.slider_button_link || '',
           date: data.event_date ? new Date(data.event_date).toISOString().split('T')[0] : '',
           location: typeof data.location === 'string' ? JSON.parse(data.location) : data.location,
           media: typeof data.media === 'string' ? JSON.parse(data.media) : data.media,
@@ -120,23 +119,41 @@ export default function EventEditor() {
     }
   };
 
-  const handleAutoGenerateSlider = () => {
-    const titleAr = event.title?.ar || '';
-    const titleEn = event.title?.en || '';
-    setEvent({
-      ...event,
-      show_in_slider: true,
-      slider_image: event.slider_image || event.imageUrl || '',
-      slider_caption: {
-        ar: event.slider_caption?.ar || titleAr,
-        en: event.slider_caption?.en || titleEn
-      },
-      slider_button_text: {
-        ar: event.slider_button_text?.ar || 'شاهد الفعالية',
-        en: event.slider_button_text?.en || 'View Event'
-      },
-      slider_button_link: event.slider_button_link || ''
-    });
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const handleAutoGenerateSlider = async () => {
+    setGeneratingSummary(true);
+    try {
+      const result = await generateSliderSummary(event.title, event.description);
+      const capAr = result?.caption?.ar || event.title?.ar || '';
+      const capEn = result?.caption?.en || event.title?.en || '';
+      setEvent(prev => ({
+        ...prev,
+        show_in_slider: true,
+        slider_image: prev.slider_image || prev.imageUrl || '',
+        slider_caption: { ar: capAr, en: capEn },
+        slider_button_text: {
+          ar: prev.slider_button_text?.ar || 'شاهد الفعالية',
+          en: prev.slider_button_text?.en || 'View Event'
+        }
+      }));
+    } catch (e) {
+      console.error(e);
+      setEvent(prev => ({
+        ...prev,
+        show_in_slider: true,
+        slider_image: prev.slider_image || prev.imageUrl || '',
+        slider_caption: {
+          ar: prev.slider_caption?.ar || prev.title?.ar || '',
+          en: prev.slider_caption?.en || prev.title?.en || ''
+        },
+        slider_button_text: {
+          ar: prev.slider_button_text?.ar || 'شاهد الفعالية',
+          en: prev.slider_button_text?.en || 'View Event'
+        }
+      }));
+    } finally {
+      setGeneratingSummary(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -287,10 +304,15 @@ export default function EventEditor() {
               <button
                 type="button"
                 onClick={handleAutoGenerateSlider}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200/50 transition-colors"
+                disabled={generatingSummary}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200/50 transition-colors disabled:opacity-50"
                 title="توليد ملخص وتنشيط السلايدر تلقائياً بنقرة واحدة"
               >
-                <Sparkles size={12} className="text-amber-500 fill-amber-500 animate-pulse" />
+                {generatingSummary ? (
+                  <Loader2 size={12} className="animate-spin text-blue-600" />
+                ) : (
+                  <Sparkles size={12} className="text-amber-500 fill-amber-500 animate-pulse" />
+                )}
                 توليد ملخص للسلايدر
               </button>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -312,17 +334,6 @@ export default function EventEditor() {
               <input type="text" placeholder="Caption (EN)" value={event.slider_caption?.en} onChange={e => setEvent({...event, slider_caption: {...event.slider_caption!, en: e.target.value}})} className="p-3 rounded-xl border border-slate-200" />
               <input type="text" placeholder="Button Text (AR)" value={event.slider_button_text?.ar} onChange={e => setEvent({...event, slider_button_text: {...event.slider_button_text!, ar: e.target.value}})} className="p-3 rounded-xl border border-slate-200" />
               <input type="text" placeholder="Button Text (EN)" value={event.slider_button_text?.en} onChange={e => setEvent({...event, slider_button_text: {...event.slider_button_text!, en: e.target.value}})} className="p-3 rounded-xl border border-slate-200" />
-              <input type="text" placeholder="Button Link" value={event.slider_button_link} onChange={e => setEvent({...event, slider_button_link: e.target.value})} className="p-3 rounded-xl border border-slate-200" />
-              <div className="flex gap-2 md:col-span-2 pt-2">
-                <a 
-                  href={`/api/slider-preview/event/${id || 'new'}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 text-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-100"
-                >
-                  {isRtl ? 'معاينة شريط العرض' : 'Preview in Slider'}
-                </a>
-              </div>
             </div>
           )}
         </div>

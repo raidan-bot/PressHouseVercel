@@ -20,8 +20,8 @@ export default function LoginPage() {
     setErrorMSG('');
     try {
       const response = await api.post('/api/auth/login', { email, password });
-      const { user } = response.data;
-      updateUserContext(user);
+      const { token, user } = response.data;
+      updateUserContext(token, user);
       navigate('/admin');
     } catch (error: any) {
       setErrorMSG(error.response?.data?.message || 'Login failed');

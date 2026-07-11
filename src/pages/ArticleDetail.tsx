@@ -6,9 +6,14 @@ import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { Calendar, User, ArrowLeft, Share2, Facebook, Twitter, Link as LinkIcon, Clock, Tag, ChevronRight, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Article } from '../types';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { api } from '../services/api';
-import { cn } from '../lib/utils';
 import NewsletterSignup from '../components/NewsletterSignup';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function ArticleDetail() {
   const { id } = useParams();

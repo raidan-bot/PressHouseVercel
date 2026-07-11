@@ -34,15 +34,19 @@ const initDbSchema = async (dbPool: any, isPostgres: boolean) => {
     schema = schema.replace(/UNIQUE KEY /gi, 'UNIQUE ');
   } else {
     // PostgreSQL adjustments
-    schema = schema.replace(/id INT AUTO_INCREMENT PRIMARY KEY/gi, 'id SERIAL PRIMARY KEY');
-    schema = schema.replace(/id INTEGER AUTO_INCREMENT PRIMARY KEY/gi, 'id SERIAL PRIMARY KEY');
-    schema = schema.replace(/DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP/gi, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+    schema = schema.replace(/id\s+INT\s+AUTO_INCREMENT\s+PRIMARY\s+KEY/gi, 'id SERIAL PRIMARY KEY');
+    schema = schema.replace(/id\s+INTEGER\s+AUTO_INCREMENT\s+PRIMARY\s+KEY/gi, 'id SERIAL PRIMARY KEY');
+    schema = schema.replace(/id\s+INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT/gi, 'id SERIAL PRIMARY KEY');
+    schema = schema.replace(/INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT/gi, 'SERIAL PRIMARY KEY');
+    schema = schema.replace(/DATETIME\s+DEFAULT\s+CURRENT_TIMESTAMP\s+ON\s+UPDATE\s+CURRENT_TIMESTAMP/gi, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
     schema = schema.replace(/DATETIME/gi, 'TIMESTAMP');
     // PG uses VARCHAR instead of ENUM inline if not created as a type, so let's simplify ENUMs to VARCHAR for PG to avoid complex type creation in simple scripts
-    schema = schema.replace(/\sENUM\([^)]+\)/gi, ' VARCHAR(255)');
-    schema = schema.replace(/CREATE TABLE/gi, 'CREATE TABLE IF NOT EXISTS');
-    schema = schema.replace(/CREATE TABLE IF NOT EXISTS IF NOT EXISTS/gi, 'CREATE TABLE IF NOT EXISTS');
-    schema = schema.replace(/UNIQUE KEY /gi, 'UNIQUE ');
+    schema = schema.replace(/\s+ENUM\([^)]+\)/gi, ' VARCHAR(255)');
+    schema = schema.replace(/CREATE\s+TABLE/gi, 'CREATE TABLE IF NOT EXISTS');
+    schema = schema.replace(/CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+IF\s+NOT\s+EXISTS/gi, 'CREATE TABLE IF NOT EXISTS');
+    schema = schema.replace(/UNIQUE\s+KEY\s+/gi, 'UNIQUE ');
+    // Replace MySQL/SQLite backticks with standard SQL double quotes
+    schema = schema.replace(/`/g, '"');
   }
 
   const statements = schema
@@ -64,7 +68,7 @@ const initDbSchema = async (dbPool: any, isPostgres: boolean) => {
     } catch (stmtError: any) {
       errorCount++;
       if (!stmtError.message.includes('already exists') && !stmtError.message.includes('duplicate')) {
-        console.error(`Statement execution error: ${statement.substring(0, 50)}...`, stmtError.message);
+        console.error(`Statement execution error:`, statement, stmtError.message);
       }
     }
   }
@@ -198,6 +202,7 @@ if (usePostgres) {
       try { db.exec("ALTER TABLE violations ADD COLUMN latitude REAL;"); } catch (e) {}
       try { db.exec("ALTER TABLE violations ADD COLUMN longitude REAL;"); } catch (e) {}
       try { db.exec("ALTER TABLE projects ADD COLUMN isFeatured INTEGER DEFAULT 0;"); } catch (e) {}
+      try { db.exec("ALTER TABLE articles ADD COLUMN subcategory TEXT;"); } catch (e) {}
       
       const tables = ['articles', 'jobs', 'courses', 'projects', 'events'];
       tables.forEach(table => {
@@ -205,20 +210,7 @@ if (usePostgres) {
         try { db.exec(`ALTER TABLE ${table} ADD COLUMN slider_caption TEXT;`); } catch(e) {}
         try { db.exec(`ALTER TABLE ${table} ADD COLUMN slider_button_text TEXT;`); } catch(e) {}
         try { db.exec(`ALTER TABLE ${table} ADD COLUMN slider_image TEXT;`); } catch(e) {}
-        try { db.exec(`ALTER TABLE ${table} ADD COLUMN slider_button_link TEXT;`); } catch(e) {}
-        try { db.exec(`ALTER TABLE ${table} ADD COLUMN sector_id TEXT;`); } catch(e) {}
-        try { db.exec(`ALTER TABLE ${table} ADD COLUMN program_id TEXT;`); } catch(e) {}
-        try { db.exec(`ALTER TABLE ${table} ADD COLUMN project_id TEXT;`); } catch(e) {}
       });
-
-      // Extra article-only columns
-      try { db.exec("ALTER TABLE articles ADD COLUMN featured INTEGER DEFAULT 0;"); } catch(e) {}
-      try { db.exec("ALTER TABLE articles ADD COLUMN views INTEGER DEFAULT 0;"); } catch(e) {}
-      try { db.exec("ALTER TABLE articles ADD COLUMN category_id INTEGER;"); } catch(e) {}
-
-      // Hero slides entity reference columns
-      try { db.exec("ALTER TABLE hero_slides ADD COLUMN entity_type TEXT;"); } catch(e) {}
-      try { db.exec("ALTER TABLE hero_slides ADD COLUMN entity_id TEXT;"); } catch(e) {}
 
       // Clear existing demo data for events, tenders, and jobs as requested by user
       try { db.exec("DELETE FROM events;"); } catch (e) {}
@@ -253,6 +245,9 @@ if (usePostgres) {
       await pool.query(`ALTER TABLE "site_settings" ADD COLUMN IF NOT EXISTS "${col}" ${type};`);
     } catch(e: any) {}
   };
+  try {
+    pool.query('ALTER TABLE "articles" ADD COLUMN IF NOT EXISTS "subcategory" VARCHAR(255);');
+  } catch(e) {}
   addPgCol('s3Provider', 'VARCHAR(255)');
   addPgCol('s3AccessKeyId', 'TEXT');
   addPgCol('s3SecretAccessKey', 'TEXT');
@@ -260,25 +255,6 @@ if (usePostgres) {
   addPgCol('s3Bucket', 'VARCHAR(255)');
   addPgCol('s3Endpoint', 'TEXT');
   addPgCol('s3Enabled', 'INTEGER DEFAULT 0');
-
-  // PostgreSQL migrations for new schema columns
-  const addPgColToTable = async (table: string, col: string, type: string) => {
-    try {
-      await pool.query(`ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "${col}" ${type};`);
-    } catch(e: any) {}
-  };
-  const pgTables = ['articles', 'events', 'jobs', 'courses', 'projects'];
-  for (const t of pgTables) {
-    await addPgColToTable(t, 'slider_button_link', 'TEXT');
-    await addPgColToTable(t, 'sector_id', 'VARCHAR(255)');
-    await addPgColToTable(t, 'program_id', 'VARCHAR(255)');
-    await addPgColToTable(t, 'project_id', 'VARCHAR(255)');
-  }
-  await addPgColToTable('articles', 'featured', 'BOOLEAN DEFAULT FALSE');
-  await addPgColToTable('articles', 'views', 'INTEGER DEFAULT 0');
-  await addPgColToTable('articles', 'category_id', 'INTEGER');
-  await addPgColToTable('hero_slides', 'entity_type', 'VARCHAR(50)');
-  await addPgColToTable('hero_slides', 'entity_id', 'VARCHAR(255)');
 }
 
 export default pool;

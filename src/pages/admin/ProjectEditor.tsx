@@ -10,6 +10,7 @@ import { Project } from '../../types';
 import { api } from '../../services/api';
 import { ImagePicker } from '../../components/admin/ImagePicker';
 import { SmartTranslate } from '../../components/admin/SmartTranslate';
+import { generateSliderSummary } from '../../services/AIService';
 
 export default function ProjectEditor() {
   const { id } = useParams();
@@ -35,7 +36,6 @@ export default function ProjectEditor() {
     slider_caption: { ar: '', en: '' },
     slider_button_text: { ar: '', en: '' },
     slider_image: '',
-    slider_button_link: '',
     beneficiaries_count: 0,
     start_date: '',
     end_date: '',
@@ -66,7 +66,6 @@ export default function ProjectEditor() {
               show_in_slider: data.show_in_slider === 1 || data.show_in_slider === true,
               slider_caption: typeof data.slider_caption === 'string' ? JSON.parse(data.slider_caption) : (data.slider_caption || {ar: '', en: ''}),
               slider_button_text: typeof data.slider_button_text === 'string' ? JSON.parse(data.slider_button_text) : (data.slider_button_text || {ar: '', en: ''}),
-              slider_button_link: data.slider_button_link || '',
               title: typeof data.title === 'string' ? JSON.parse(data.title) : (data.title || {ar: '', en: ''}),
               description: typeof data.description === 'string' ? JSON.parse(data.description) : (data.description || {ar: '', en: ''}),
               seo: typeof data.seo === 'string' ? JSON.parse(data.seo) : (data.seo || {title: {ar: '', en: ''}, description: {ar: '', en: ''}, keywords: {ar: '', en: ''}}),
@@ -156,23 +155,41 @@ export default function ProjectEditor() {
     }
   };
 
-  const handleAutoGenerateSlider = () => {
-    const titleAr = project.title?.ar || '';
-    const titleEn = project.title?.en || '';
-    setProject({
-      ...project,
-      show_in_slider: true,
-      slider_image: project.slider_image || project.image || '',
-      slider_caption: {
-        ar: project.slider_caption?.ar || titleAr,
-        en: project.slider_caption?.en || titleEn
-      },
-      slider_button_text: {
-        ar: project.slider_button_text?.ar || 'شاهد تفاصيل المشروع',
-        en: project.slider_button_text?.en || 'View Project Details'
-      },
-      slider_button_link: project.slider_button_link || ''
-    });
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const handleAutoGenerateSlider = async () => {
+    setGeneratingSummary(true);
+    try {
+      const result = await generateSliderSummary(project.title, project.description);
+      const capAr = result?.caption?.ar || project.title?.ar || '';
+      const capEn = result?.caption?.en || project.title?.en || '';
+      setProject(prev => ({
+        ...prev,
+        show_in_slider: true,
+        slider_image: prev.slider_image || prev.image || '',
+        slider_caption: { ar: capAr, en: capEn },
+        slider_button_text: {
+          ar: prev.slider_button_text?.ar || 'شاهد تفاصيل المشروع',
+          en: prev.slider_button_text?.en || 'View Project Details'
+        }
+      }));
+    } catch (e) {
+      console.error(e);
+      setProject(prev => ({
+        ...prev,
+        show_in_slider: true,
+        slider_image: prev.slider_image || prev.image || '',
+        slider_caption: {
+          ar: prev.slider_caption?.ar || prev.title?.ar || '',
+          en: prev.slider_caption?.en || prev.title?.en || ''
+        },
+        slider_button_text: {
+          ar: prev.slider_button_text?.ar || 'شاهد تفاصيل المشروع',
+          en: prev.slider_button_text?.en || 'View Project Details'
+        }
+      }));
+    } finally {
+      setGeneratingSummary(false);
+    }
   };
 
   const handleSave = async () => {
@@ -620,10 +637,15 @@ export default function ProjectEditor() {
                 <button
                   type="button"
                   onClick={handleAutoGenerateSlider}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200/50 transition-colors"
+                  disabled={generatingSummary}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 border border-blue-200/50 transition-colors disabled:opacity-50"
                   title="توليد ملخص وتنشيط السلايدر تلقائياً بنقرة واحدة"
                 >
-                  <Sparkles size={12} className="text-amber-500 fill-amber-500 animate-pulse" />
+                  {generatingSummary ? (
+                    <Loader2 size={12} className="animate-spin text-blue-600" />
+                  ) : (
+                    <Sparkles size={12} className="text-amber-500 fill-amber-500 animate-pulse" />
+                  )}
                   {isRtl ? 'توليد ملخص' : 'Generate Summary'}
                 </button>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -657,26 +679,6 @@ export default function ProjectEditor() {
                       className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
                     />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{isRtl ? 'رابط الزر' : 'Button Link'}</label>
-                  <input 
-                    type="text"
-                    value={project.slider_button_link || ''}
-                    onChange={(e) => setProject({...project, slider_button_link: e.target.value})}
-                    placeholder="/projects/123 or full URL"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-                  />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <a 
-                    href={`/api/slider-preview/project/${id || 'new'}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 text-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-100"
-                  >
-                    {isRtl ? 'معاينة شريط العرض' : 'Preview in Slider'}
-                  </a>
                 </div>
               </div>
             )}

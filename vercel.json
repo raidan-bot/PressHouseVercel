@@ -1,32 +1,6 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
   "rewrites": [
-    { "source": "/api/telegram", "destination": "/api/telegram" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/uploads/(.*)", "destination": "/uploads/$1" },
-    { "source": "/((?!api|uploads).*)", "destination": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/uploads/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
-      ]
-    }
-  ],
-  "functions": {
-    "api/**/*.ts": {
-      "maxDuration": 30
-    }
-  }
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import RichTextEditor from "../../components/admin/RichTextEditor";
+const ReactQuill = lazy(() => import("react-quill"));
+import "react-quill/dist/quill.snow.css";
 import {
   Save,
   ArrowLeft,
@@ -27,6 +28,22 @@ import { useAuth } from "../../context/AuthContext";
 import { MediaLibraryModal } from "../../components/media/MediaLibraryModal";
 import { translateText, generateSeoMetadata } from "../../services/AIService";
 import { SmartTranslate } from "../../components/admin/SmartTranslate";
+
+const quillModules = {
+  toolbar: [
+    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+    [{ font: [] }],
+    ["bold", "underline", "strike"],
+    [{ color: [] }, { background: [] }],
+    [{ script: "sub" }, { script: "super" }],
+    [{ list: "ordered" }, { list: "bullet" }],
+    [{ indent: "-1" }, { indent: "+1" }],
+    [{ direction: "rtl" }],
+    [{ align: [] }],
+    ["link", "image", "video", "blockquote", "code-block"],
+    ["clean"],
+  ],
+};
 
 export default function CourseEditor() {
   const { id } = useParams();
@@ -57,7 +74,6 @@ export default function CourseEditor() {
     show_in_slider: false,
     slider_caption: { ar: "", en: "" },
     slider_button_text: { ar: "", en: "" },
-    slider_button_link: "",
     slider_image: "",
     videos: [],
     isLive: false,
@@ -152,7 +168,6 @@ export default function CourseEditor() {
                 typeof data.slider_button_text === "string"
                   ? JSON.parse(data.slider_button_text)
                   : data.slider_button_text || { ar: "", en: "" },
-              slider_button_link: data.slider_button_link || "",
               title:
                 typeof data.title === "string"
                   ? JSON.parse(data.title)
@@ -282,7 +297,7 @@ export default function CourseEditor() {
                       {isRtl ? "العنوان (بالعربية)" : "Title (Arabic)"}
                     </label>
                     <SmartTranslate
-                      text={course.title?.en}
+                      sourceText={course.title?.en}
                       onTranslate={(text) =>
                         setCourse({
                           ...course,
@@ -310,8 +325,8 @@ export default function CourseEditor() {
                       {isRtl ? "العنوان (بالإنجليزية)" : "Title (English)"}
                     </label>
                     <SmartTranslate
-                      text={course.title?.ar}
-                      targetLanguage="en"
+                      sourceText={course.title?.ar}
+                      targetLang="en"
                       onTranslate={(text) =>
                         setCourse({
                           ...course,
@@ -341,7 +356,7 @@ export default function CourseEditor() {
                     {isRtl ? "الوصف (بالعربية)" : "Description (Arabic)"}
                   </label>
                   <SmartTranslate
-                    text={course.description?.en}
+                    sourceText={course.description?.en}
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -350,16 +365,22 @@ export default function CourseEditor() {
                     }
                   />
                 </div>
-                <RichTextEditor
-                    value={course.description?.ar || ""}
-                    onChange={(content) =>
-                      setCourse({
-                        ...course,
-                        description: { ...course.description!, ar: content },
-                      })
-                    }
-                    placeholder={isRtl ? "الوصف بالعربية..." : "Description in Arabic..."}
-                  />
+                <div className="quill-wrapper" dir="rtl">
+                  <Suspense fallback={<Loader2 className="animate-spin" />}>
+                    <ReactQuill
+                      theme="snow"
+                      value={course.description?.ar || ""}
+                      onChange={(content) =>
+                        setCourse({
+                          ...course,
+                          description: { ...course.description!, ar: content },
+                        })
+                      }
+                      modules={quillModules}
+                      className="bg-white rounded-xl overflow-hidden min-h-[200px]"
+                    />
+                  </Suspense>
+                </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center mb-1">
@@ -367,8 +388,8 @@ export default function CourseEditor() {
                     {isRtl ? "الوصف (بالإنجليزية)" : "Description (English)"}
                   </label>
                   <SmartTranslate
-                    text={course.description?.ar}
-                    targetLanguage="en"
+                    sourceText={course.description?.ar}
+                    targetLang="en"
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -377,16 +398,22 @@ export default function CourseEditor() {
                     }
                   />
                 </div>
-                <RichTextEditor
-                    value={course.description?.en || ""}
-                    onChange={(content) =>
-                      setCourse({
-                        ...course,
-                        description: { ...course.description!, en: content },
-                      })
-                    }
-                    placeholder={isRtl ? "الوصف بالإنجليزية..." : "Description in English..."}
-                  />
+                <div className="quill-wrapper">
+                  <Suspense fallback={<Loader2 className="animate-spin" />}>
+                    <ReactQuill
+                      theme="snow"
+                      value={course.description?.en || ""}
+                      onChange={(content) =>
+                        setCourse({
+                          ...course,
+                          description: { ...course.description!, en: content },
+                        })
+                      }
+                      modules={quillModules}
+                      className="bg-white rounded-xl overflow-hidden min-h-[200px]"
+                    />
+                  </Suspense>
+                </div>
               </div>
             </div>
           </div>
@@ -405,7 +432,7 @@ export default function CourseEditor() {
                     {isRtl ? "اسم المدرب (بالعربية)" : "Trainer Name (Arabic)"}
                   </label>
                   <SmartTranslate
-                    text={course.trainer?.name.en}
+                    sourceText={course.trainer?.name.en}
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -440,8 +467,8 @@ export default function CourseEditor() {
                       : "Trainer Name (English)"}
                   </label>
                   <SmartTranslate
-                    text={course.trainer?.name.ar}
-                    targetLanguage="en"
+                    sourceText={course.trainer?.name.ar}
+                    targetLang="en"
                     onTranslate={(text) =>
                       setCourse({
                         ...course,
@@ -936,33 +963,11 @@ export default function CourseEditor() {
                         })
                       }
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
-              />
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs font-black text-slate-400 uppercase tracking-widest">{isRtl ? 'رابط الزر' : 'Button Link'}</label>
-              <input
-                type="text"
-                placeholder="/courses/123 or full URL"
-                value={course.slider_button_link || ''}
-                onChange={(e) =>
-                  setCourse({ ...course, slider_button_link: e.target.value })
-                }
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
-            <div className="flex gap-2 pt-2">
-              <a
-                href={`/api/slider-preview/course/${id || 'new'}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 text-center px-4 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors border border-indigo-100"
-              >
-                {isRtl ? 'معاينة شريط العرض' : 'Preview in Slider'}
-              </a>
-            </div>
-          </div>
-        )}
+            )}
           </div>
 
           {/* Live Stream */}

@@ -29,6 +29,7 @@ export interface Article {
   title: { ar: string; en: string };
   content: { ar: string; en: string };
   category: 'news' | 'report' | 'press_release';
+  subcategory?: string | null;
   authorId: string;
   status: 'draft' | 'published';
   language: 'ar' | 'en' | 'both';

@@ -1,29 +1,3 @@
-CREATE TABLE categories (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name_ar VARCHAR(255) NOT NULL,
-  name_en VARCHAR(255) NOT NULL,
-  slug VARCHAR(255) UNIQUE,
-  parent_id INT DEFAULT NULL,
-  type ENUM('article', 'event', 'project', 'all') DEFAULT 'article',
-  sort_order INT DEFAULT 0,
-  isActive BOOLEAN DEFAULT TRUE,
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE tags (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name_ar VARCHAR(255) NOT NULL,
-  name_en VARCHAR(255) NOT NULL,
-  slug VARCHAR(255) UNIQUE,
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE article_tags (
-  article_id VARCHAR(255) NOT NULL,
-  tag_id INT NOT NULL,
-  PRIMARY KEY (article_id, tag_id)
-);
-
 CREATE TABLE users (
   uid VARCHAR(255) PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
@@ -38,21 +12,15 @@ CREATE TABLE articles (
   id VARCHAR(255) PRIMARY KEY,
   title JSON NOT NULL,
   content JSON NOT NULL,
-  category VARCHAR(50) NOT NULL DEFAULT 'news',
-  category_id INT DEFAULT NULL,
+  category ENUM('news', 'report', 'press_release') NOT NULL,
+  subcategory VARCHAR(255),
   authorId VARCHAR(255),
   status ENUM('draft', 'published') NOT NULL,
   language ENUM('ar', 'en', 'both') NOT NULL,
   mainImage TEXT,
-  featured BOOLEAN DEFAULT FALSE,
-  views INT DEFAULT 0,
-  sector_id VARCHAR(255) DEFAULT NULL,
-  program_id VARCHAR(255) DEFAULT NULL,
-  project_id VARCHAR(255) DEFAULT NULL,
   show_in_slider BOOLEAN DEFAULT FALSE,
   slider_caption JSON,
   slider_button_text JSON,
-  slider_button_link TEXT DEFAULT NULL,
   slider_image TEXT,
   seo JSON,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -85,13 +53,9 @@ CREATE TABLE jobs (
   requirements JSON NOT NULL,
   deadline DATETIME,
   status ENUM('open', 'closed') NOT NULL,
-  sector_id VARCHAR(255) DEFAULT NULL,
-  program_id VARCHAR(255) DEFAULT NULL,
-  project_id VARCHAR(255) DEFAULT NULL,
   show_in_slider BOOLEAN DEFAULT FALSE,
   slider_caption JSON,
   slider_button_text JSON,
-  slider_button_link TEXT DEFAULT NULL,
   slider_image TEXT,
   seo JSON,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -121,86 +85,12 @@ CREATE TABLE courses (
   streamKey VARCHAR(255),
   streamUrl TEXT,
   status ENUM('active', 'archived') NOT NULL,
-  sector_id VARCHAR(255) DEFAULT NULL,
-  program_id VARCHAR(255) DEFAULT NULL,
-  project_id VARCHAR(255) DEFAULT NULL,
   show_in_slider BOOLEAN DEFAULT FALSE,
   slider_caption JSON,
   slider_button_text JSON,
-  slider_button_link TEXT DEFAULT NULL,
   slider_image TEXT,
   seo JSON,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE academy_applications (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  course_id VARCHAR(255) NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  full_name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  phone VARCHAR(255),
-  education TEXT,
-  experience TEXT,
-  motivation TEXT,
-  cv_url TEXT,
-  scoring_data TEXT DEFAULT '',
-  reviewer_notes TEXT DEFAULT '',
-  status ENUM('pending','approved','rejected') DEFAULT 'pending',
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE academy_trainers (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  bio TEXT,
-  expertise TEXT,
-  experience TEXT,
-  certifications TEXT,
-  rating INTEGER DEFAULT 5,
-  feedback TEXT DEFAULT '',
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE academy_venues (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  type VARCHAR(255),
-  capacity INTEGER,
-  equipment TEXT,
-  accessibility TEXT,
-  cost DECIMAL(10,2) DEFAULT 0.00
-);
-
-CREATE TABLE academy_logistics (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  course_id VARCHAR(255) NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  item_type VARCHAR(255) NOT NULL,
-  details TEXT,
-  cost DECIMAL(10,2) DEFAULT 0.00,
-  status ENUM('pending','ordered','delivered','cancelled') DEFAULT 'pending'
-);
-
-CREATE TABLE academy_certificates (
-  id VARCHAR(255) PRIMARY KEY,
-  course_id VARCHAR(255) NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  recipient_name VARCHAR(255) NOT NULL,
-  recipient_email VARCHAR(255),
-  type VARCHAR(255),
-  issue_date DATE DEFAULT (CURRENT_DATE),
-  qr_code_url TEXT,
-  verify_url TEXT,
-  status ENUM('active','revoked','expired') DEFAULT 'active'
-);
-
-CREATE TABLE academy_alumni (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  full_name VARCHAR(255) NOT NULL,
-  email VARCHAR(255),
-  graduation_year INTEGER,
-  courses_completed JSON DEFAULT '[]',
-  current_position VARCHAR(255),
-  organization VARCHAR(255),
-  is_mentor BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE projects (
@@ -212,12 +102,9 @@ CREATE TABLE projects (
   fundingGoal DECIMAL(10, 2),
   currentFunding DECIMAL(10, 2),
   isFeatured BOOLEAN DEFAULT FALSE,
-  sector_id VARCHAR(255) DEFAULT NULL,
-  program_id VARCHAR(255) DEFAULT NULL,
   show_in_slider BOOLEAN DEFAULT FALSE,
   slider_caption JSON,
   slider_button_text JSON,
-  slider_button_link TEXT DEFAULT NULL,
   slider_image TEXT,
   seo JSON,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -235,13 +122,9 @@ CREATE TABLE events (
   liveStreamUrl TEXT,
   streamKey VARCHAR(255),
   streamUrl TEXT,
-  sector_id VARCHAR(255) DEFAULT NULL,
-  program_id VARCHAR(255) DEFAULT NULL,
-  project_id VARCHAR(255) DEFAULT NULL,
   show_in_slider BOOLEAN DEFAULT FALSE,
   slider_caption JSON,
   slider_button_text JSON,
-  slider_button_link TEXT DEFAULT NULL,
   slider_image TEXT,
   media JSON,
   seo JSON,
@@ -343,8 +226,6 @@ CREATE TABLE hero_slides (
   textAlign ENUM('left', 'center', 'right') DEFAULT 'left',
   primaryButton JSON,
   secondaryButton JSON,
-  entity_type VARCHAR(50) DEFAULT NULL,
-  entity_id VARCHAR(255) DEFAULT NULL,
   `order` INT,
   isActive BOOLEAN DEFAULT TRUE,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -430,13 +311,6 @@ CREATE TABLE IF NOT EXISTS projects (
   deliverables JSON,
   location_governorate TEXT,
   location_district TEXT,
-  sector_id VARCHAR(255) DEFAULT NULL,
-  program_id VARCHAR(255) DEFAULT NULL,
-  show_in_slider BOOLEAN DEFAULT FALSE,
-  slider_caption TEXT,
-  slider_button_text TEXT,
-  slider_button_link TEXT DEFAULT NULL,
-  slider_image TEXT,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -513,85 +387,5 @@ CREATE TABLE IF NOT EXISTS yemenjpt_beta_registrations (
   organization VARCHAR(255),
   specialization VARCHAR(255),
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Cinema Wednesday - Movie showcase table
-CREATE TABLE IF NOT EXISTS cinema_movies (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title JSON NOT NULL,
-  description JSON,
-  genre JSON,
-  imdb_id VARCHAR(50),
-  trailer_url TEXT,
-  poster_url TEXT,
-  release_year INT,
-  director VARCHAR(255),
-  duration_minutes INT,
-  rating DECIMAL(3,1),
-  status ENUM('draft', 'published') NOT NULL DEFAULT 'draft',
-  show_on_home BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- API Key Management System
-CREATE TABLE IF NOT EXISTS api_keys (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  key_hash VARCHAR(255) NOT NULL UNIQUE,
-  key_prefix VARCHAR(8) NOT NULL,
-  user_id VARCHAR(255),
-  roles JSON,
-  permissions JSON,
-  scopes JSON,
-  last_used_at TIMESTAMP,
-  expires_at TIMESTAMP,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_by VARCHAR(255),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- ================================================
--- Violations Monitoring System Tables
--- ================================================
-
-CREATE TABLE IF NOT EXISTS violations_monitoring (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  violation_id VARCHAR(255),
-  detection_type VARCHAR(255),
-  severity ENUM('critical', 'high', 'medium', 'low') NOT NULL DEFAULT 'medium',
-  status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
-  detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  ai_confidence DECIMAL(3,2) DEFAULT 0.5,
-  ai_analysis TEXT,
-  location_accuracy DECIMAL(5,2),
-  reviewed_by VARCHAR(255),
-  reviewed_at TIMESTAMP,
-  admin_notes TEXT
-);
-
-CREATE TABLE IF NOT EXISTS monitoring_alerts (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  type VARCHAR(255) NOT NULL,
-  severity ENUM('critical', 'high', 'medium', 'low') NOT NULL DEFAULT 'medium',
-  message TEXT NOT NULL,
-  related_violation_id VARCHAR(255),
-  status ENUM('active', 'resolved', 'dismissed') NOT NULL DEFAULT 'active',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  resolved_at TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS monitoring_reports (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  type VARCHAR(50) DEFAULT 'comprehensive',
-  period_start TIMESTAMP,
-  period_end TIMESTAMP,
-  data_summary JSON,
-  generated_by VARCHAR(255),
-  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  status VARCHAR(50) DEFAULT 'generated',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -10,8 +10,13 @@ import { SEO } from '../components/common/SEO';
 import { Breadcrumbs } from '../components/common/Breadcrumbs';
 import { motion } from 'motion/react';
 import { Project } from '../types';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { api } from '../services/api';
-import { cn } from '../lib/utils';
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();

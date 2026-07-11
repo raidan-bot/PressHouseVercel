@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Award, ShieldAlert, CheckCircle, Search, Calendar, Loader2, FileCheck } from 'lucide-react';
+import { Award, ShieldAlert, CheckCircle, Search, Calendar, ChevronRight, Share2, Loader2, AwardIcon, FileCheck } from 'lucide-react';
 import { SEO } from '../components/common/SEO';
-import { Card, Button, Badge } from '../components/ui';
 import { api } from '../services/api';
 
 export default function VerifyCertificate() {
@@ -90,25 +89,21 @@ export default function VerifyCertificate() {
               />
               <Search className="absolute left-3.5 top-3.5 text-slate-400" size={16} />
             </div>
-            <Button 
+            <button 
               type="submit" 
-              variant="secondary"
-              size="md"
-              className="shrink-0"
+              className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold text-xs transition-colors shrink-0"
             >
               {isRtl ? 'تحقق الآن' : 'Validate'}
-            </Button>
+            </button>
           </form>
         </div>
 
         {/* Loading display */}
         {loading && (
-          <Card padding="lg" className="text-center border rounded-3xl">
-            <div className="flex flex-col items-center justify-center space-y-3 py-8">
-              <Loader2 className="animate-spin text-blue-600" size={32} />
-              <p className="text-xs font-bold text-slate-400">{isRtl ? 'جاري مطابقة القيد وفحص التوقيع الرقمي...' : 'Connecting lookup matrix and verifying digital stamp...'}</p>
-            </div>
-          </Card>
+          <div className="bg-white border rounded-3xl p-16 text-center space-y-3 flex flex-col items-center justify-center">
+            <Loader2 className="animate-spin text-blue-600" size={32} />
+            <p className="text-xs font-bold text-slate-400">{isRtl ? 'جاري مطابقة القيد وفحص التوقيع الرقمي...' : 'Connecting lookup matrix and verifying digital stamp...'}</p>
+          </div>
         )}
 
         {/* Results layout */}
@@ -116,7 +111,7 @@ export default function VerifyCertificate() {
           <div className="space-y-6">
             
             {certificate ? (
-              <Card variant="bordered" padding="lg" className="border-2 border-emerald-500 rounded-[32px] shadow-xl space-y-6 relative">
+              <div className="bg-white border-2 border-emerald-500 rounded-[32px] overflow-hidden shadow-xl space-y-6 p-8 relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                 
                 {/* Secure Badge stamp */}
@@ -124,15 +119,15 @@ export default function VerifyCertificate() {
                   <div className="flex items-center gap-2.5">
                     <CheckCircle className="text-emerald-500 shrink-0" size={32} />
                     <div>
-                      <Badge variant="success" size="sm" className="uppercase tracking-wider">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md inline-block">
                         {isRtl ? 'وثيقة أصلية معتمدة' : 'VERIFIED / AUDITED'}
-                      </Badge>
-                      <p className="text-xs text-slate-400 font-mono font-bold tracking-tight mt-1">ID: {certificate.id}</p>
+                      </span>
+                      <p className="text-xs text-slate-400 font-mono font-bold tracking-tight">ID: {certificate.id}</p>
                     </div>
                   </div>
-                  <Badge variant="neutral" size="sm" className="font-mono">
+                  <span className="text-xs font-bold font-mono text-slate-400">
                     {isRtl ? 'حالة التوقيع: آمن' : 'Signing Node: SECURE'}
-                  </Badge>
+                  </span>
                 </div>
 
                 {/* Main credential presentation */}
@@ -188,24 +183,21 @@ export default function VerifyCertificate() {
                   </div>
                 </div>
 
-              </Card>
+              </div>
             ) : (
-              <Card variant="bordered" padding="lg" className="border-2 border-rose-200 rounded-[32px] shadow-md">
-                <div className="text-center space-y-4 py-4">
-                  <ShieldAlert className="text-rose-500 mx-auto" size={48} />
-                  <h3 className="text-base font-black text-slate-900">{isRtl ? 'التحقق غير مرخص / فشل الفحص' : 'Unlicensed Credential Scan'}</h3>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                    {errorMsg}
-                  </p>
-                  <Button 
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSearchTriggered(false)}
-                  >
-                    {isRtl ? 'إعادة المحاولة والتحقق' : 'Clear and try again'}
-                  </Button>
-                </div>
-              </Card>
+              <div className="bg-white border-2 border-rose-200 rounded-[32px] p-12 text-center shadow-md space-y-4">
+                <ShieldAlert className="text-rose-500 mx-auto" size={48} />
+                <h3 className="text-base font-black text-slate-900">{isRtl ? 'التحقق غير مرخص / فشل الفحص' : 'Unlicensed Credential Scan'}</h3>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                  {errorMsg}
+                </p>
+                <button 
+                  onClick={() => setSearchTriggered(false)}
+                  className="text-xs font-bold text-blue-600 hover:underline inline-block pt-1"
+                >
+                  {isRtl ? 'إعادة المحاولة والتحقق' : 'Clear and try again'}
+                </button>
+              </div>
             )}
 
           </div>

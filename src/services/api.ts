@@ -3,18 +3,21 @@ import toast from 'react-hot-toast';
 import { trackApiPerformance } from '../utils/performance';
 
 // Get base URL considering local dev or production
-const API_URL = import.meta.env?.VITE_API_URL || process.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 export const api = axios.create({
   baseURL: API_URL,
-  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor to start performance timer
+// Interceptor to add JWT token and start timer
 api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   // @ts-ignore
   config.metadata = { startTime: performance.now() };
   return config;
@@ -33,20 +36,41 @@ api.interceptors.response.use(
       // @ts-ignore
       trackApiPerformance(error.config.url!, error.config.metadata.startTime);
     }
+
+    // Don't show toast for canceled requests
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const status = error.response?.status;
     const message = error.response?.data?.message || error.message;
+    const method = error.config?.method?.toLowerCase();
+    
+    // Check if error is a network level issue (no status code)
+    const isNetworkError = !error.response || error.message === 'Network Error' || error.code === 'ERR_NETWORK';
 
     if (status === 401 || status === 403) {
       toast.error('جلسة العمل انتهت، يرجى تسجيل الدخول مجدداً');
+      localStorage.removeItem('token');
       if (window.location.pathname.startsWith('/admin')) {
         window.location.href = '/admin/login';
       } else {
         window.location.href = '/login';
       }
     } else if (status === 404) {
-      toast.error('الرابط المطلوب غير موجود');
+      // For 404, only toast if it's a write action (user interaction)
+      if (method !== 'get') {
+        toast.error('الرابط المطلوب غير موجود');
+      }
     } else if (status && status >= 500) {
       toast.error('خطأ في الخادم، يرجى المحاولة لاحقاً');
+    } else if (isNetworkError) {
+      // Silently handle background GET requests to avoid spamming "Network Error" toasts
+      if (method !== 'get') {
+        toast.error('تعذر الاتصال بالشبكة، يرجى التحقق من اتصال الإنترنت');
+      } else {
+        console.warn('Network error silenced for background GET request:', error.config?.url);
+      }
     } else {
       // User-friendly error messages
       toast.error(message || 'حدث خطأ غير متوقع');

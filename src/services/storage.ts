@@ -1,4 +1,5 @@
 import { api } from './api';
+import { S3Client } from '@aws-sdk/client-s3';
 
 export interface MediaAsset {
   id: string | number;
@@ -8,6 +9,38 @@ export interface MediaAsset {
   size: number;
   createdAt?: string;
 }
+
+/**
+ * Dynamically gets a configured S3 Client based on backend settings
+ */
+export const getS3Client = async () => {
+  try {
+    const { data } = await api.get('/api/s3/config');
+    
+    if (!data.configured) {
+      console.warn('S3 cloud storage is not fully configured, utilizing fallback endpoints.');
+    }
+
+    return new S3Client({
+      region: data.region || 'auto',
+      endpoint: 'https://t3.storageapi.dev',
+      credentials: {
+        accessKeyId: 'tid_sWBvagVxMblDpfpiFmWNqCL_RXaORDvhCDYgPPvdNDqFqJajQT',
+        secretAccessKey: 'tsec_ZsMeiviAjXcoHHmfgvwF816nSDRvibtjMlEvG29zsmazLrWWt4mY8iVhCHRPgOOzXymU_V',
+      },
+    });
+  } catch (error) {
+    console.error('Failed to initialize S3 client, utilizing default S3 endpoint:', error);
+    return new S3Client({
+      region: 'auto',
+      endpoint: 'https://t3.storageapi.dev',
+      credentials: {
+        accessKeyId: 'tid_sWBvagVxMblDpfpiFmWNqCL_RXaORDvhCDYgPPvdNDqFqJajQT',
+        secretAccessKey: 'tsec_ZsMeiviAjXcoHHmfgvwF816nSDRvibtjMlEvG29zsmazLrWWt4mY8iVhCHRPgOOzXymU_V',
+      },
+    });
+  }
+};
 
 /**
  * Handle secure file upload directly via S3 router on backend
